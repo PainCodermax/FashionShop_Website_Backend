@@ -1,6 +1,6 @@
 module github.com/PainCodermax/FashionShop_Website_Backend
 
-go 1.17
+go 1.20
 
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect
