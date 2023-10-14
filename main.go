@@ -1,28 +1,22 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
 	"os"
-	"path"
 
-	"github.com/joho/godotenv"
-	"github.com/labstack/echo"
+	"github.com/PainCodermax/FashionShop_Website_Backend/routes"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	fmt.Println("Go Program")
-	server := echo.New()
-	server.GET(path.Join("/"), Version)
-
-	godotenv.Load()
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+	gin.SetMode(gin.ReleaseMode)
 
-	address := fmt.Sprintf("%s:%s", "0.0.0.0", port)
-	fmt.Println(address)
-	server.Start(address)
+	router := gin.New()
+	router.Use(gin.Logger())
+	routes.AdminRoutes(router)
 
-}
-func Version(context echo.Context) error {
-	return context.JSON(http.StatusOK, map[string]interface{}{"version": 2})
+	router.Run(":" + port)
 }
