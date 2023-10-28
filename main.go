@@ -8,7 +8,6 @@ import (
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/middleware"
 	"github.com/PainCodermax/FashionShop_Website_Backend/routes"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +19,7 @@ func main() {
 	app := controllers.NewApplication(
 		database.ProductData(database.Client, "product"),
 		database.UserData(database.Client, "user"),
+		database.UserData(database.Client, "category"),
 	)
 
 	router := gin.New()

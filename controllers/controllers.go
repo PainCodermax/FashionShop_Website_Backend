@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	generate "github.com/PainCodermax/FashionShop_Website_Backend/tokens"
 
@@ -15,12 +14,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var UserCollection *mongo.Collection = database.UserData(database.Client, "user")
-var ProductCollection *mongo.Collection = database.ProductData(database.Client, "product")
 var Validate = validator.New()
 
 func HashPassword(password string) string {

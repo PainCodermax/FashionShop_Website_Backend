@@ -17,14 +17,16 @@ import (
 )
 
 type Application struct {
-	prodCollection *mongo.Collection
-	userCollection *mongo.Collection
+	prodCollection     *mongo.Collection
+	userCollection     *mongo.Collection
+	categoryCollection *mongo.Collection
 }
 
-func NewApplication(prodCollection, userCollection *mongo.Collection) *Application {
+func NewApplication(prodCollection, userCollection, categoryCollection *mongo.Collection) *Application {
 	return &Application{
-		prodCollection: prodCollection,
-		userCollection: userCollection,
+		prodCollection:     prodCollection,
+		userCollection:     userCollection,
+		categoryCollection: CategoryCollection,
 	}
 }
 

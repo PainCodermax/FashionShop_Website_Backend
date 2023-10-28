@@ -18,5 +18,6 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 func AdminRouter(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/admin/addproduct", controllers.AddProduct())
 	incomingRoutes.GET("/admin/getlistproduct", controllers.GetListProduct())
+	incomingRoutes.POST("/admin/addproduct", controllers.AddCategory())
 
 }

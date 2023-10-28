@@ -5,11 +5,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var ProductCollection *mongo.Collection = database.ProductData(database.Client, "product")
+var UserCollection *mongo.Collection = database.UserData(database.Client,"user")
 
 func GetListProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -94,7 +99,7 @@ func AddProduct() gin.HandlerFunc {
 // 				}
 // 				var editProduct models.Product
 // 				if err := c.BindJSON(&editProduct); err != nil {
-					
+
 // 				}
 
 // 			}
