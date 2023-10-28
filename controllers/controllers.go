@@ -128,6 +128,7 @@ func Login() gin.HandlerFunc {
 		token, refreshToken, _ := generate.TokenGenerator(*founduser.Email, *founduser.First_Name, *founduser.Last_Name, founduser.User_ID, founduser.IsAdmin)
 		defer cancel()
 		generate.UpdateAllTokens(token, refreshToken, founduser.User_ID)
+		founduser.Refresh_Token = &refreshToken
 		c.JSON(http.StatusOK, founduser)
 	}
 }
@@ -216,4 +217,3 @@ func SearchProductByQuery() gin.HandlerFunc {
 		c.IndentedJSON(200, searchproducts)
 	}
 }
-
