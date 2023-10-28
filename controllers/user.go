@@ -21,10 +21,10 @@ func GetNewToken() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err})
 			return
 		}
-		err := UserCollection.FindOne(ctx, bson.M{"refresh_token": user.Refresh_Token}).Decode(&founduser)
+		err := UserCollection.FindOne(ctx, bson.M{"refresh_token": *user.Refresh_Token}).Decode(&founduser)
 		defer cancel()
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "login or password incorrect"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
 			return
 		}
 		token, _ := generate.AccessTokenGenerator(*founduser.Email, *founduser.First_Name, *founduser.Last_Name, founduser.User_ID, founduser.IsAdmin)

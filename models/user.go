@@ -14,7 +14,7 @@ type User struct {
 	Email           *string            `json:"email"`
 	Phone           *string            `json:"phone"      validate:"required"`
 	Token           *string            `json:"token"`
-	Refresh_Token   *string            `josn:"refresh_token"`
+	Refresh_Token   *string            `jsonn:"refresh_token"`
 	Created_At      time.Time          `json:"created_at"`
 	Updated_At      time.Time          `json:"updtaed_at"`
 	User_ID         string             `json:"user_id"`
@@ -23,7 +23,6 @@ type User struct {
 	Order_Status    []Order            `json:"orders" bson:"orders"`
 	IsAdmin         bool               `json:"isAdmin,omitempty" bson:"is_admin,omitempty"`
 }
-
 
 type ProductUser struct {
 	Product_ID   primitive.ObjectID `bson:"_id"`
