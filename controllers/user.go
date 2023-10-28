@@ -30,6 +30,7 @@ func GetNewToken() gin.HandlerFunc {
 		token, _ := generate.AccessTokenGenerator(*founduser.Email, *founduser.First_Name, *founduser.Last_Name, founduser.User_ID, founduser.IsAdmin)
 		defer cancel()
 		generate.UpdateAccessToken(token, founduser.User_ID)
+		founduser.Token = &token
 		c.JSON(http.StatusOK, founduser)
 	}
 }

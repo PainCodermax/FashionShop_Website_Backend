@@ -75,9 +75,9 @@ func AddProduct() gin.HandlerFunc {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "Not have authorization"})
 				return
 			}
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
 		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
-		return
 	}
 }
 
@@ -94,13 +94,12 @@ func AddProduct() gin.HandlerFunc {
 // 				}
 // 				var editProduct models.Product
 // 				if err := c.BindJSON(&editProduct); err != nil {
-
+					
 // 				}
 
-
 // 			}
+// 		} else {
+// 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
 // 		}
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
-// 		return
 // 	}
 // }
