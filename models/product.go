@@ -10,3 +10,5 @@ type Product struct {
 	ListImage   []*string          `json:"listImage,omitempty" bson:"list_image,omitempty"`
 	Quantity    *int               `json:"quantity,omitempty" bson:"quantity,omitempty"`
 }
+
+

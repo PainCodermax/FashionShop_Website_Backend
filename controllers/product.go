@@ -76,5 +76,31 @@ func AddProduct() gin.HandlerFunc {
 				return
 			}
 		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
 	}
 }
+
+// func UpdateProduct() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		if value, ok := c.Get("isAdmin"); ok {
+// 			if value == true {
+// 				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+// 				productId := c.Query("productId")
+// 				if productId == "" {
+// 					c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
+// 					c.Abort()
+// 					return
+// 				}
+// 				var editProduct models.Product
+// 				if err := c.BindJSON(&editProduct); err != nil {
+
+// 				}
+
+
+// 			}
+// 		}
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
+// 		return
+// 	}
+// }

@@ -216,3 +216,4 @@ func SearchProductByQuery() gin.HandlerFunc {
 		c.IndentedJSON(200, searchproducts)
 	}
 }
+

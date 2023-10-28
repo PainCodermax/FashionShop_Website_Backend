@@ -20,7 +20,7 @@ func Authentication() gin.HandlerFunc {
 		tokenResult := strings.Join(tokenSplit[1:], " ")
 		claims, err := token.ValidateToken(tokenResult)
 		if err != "" {
-			c.JSON(http.StatusNonAuthoritativeInfo, gin.H{"error": err})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err})
 			c.Abort()
 			return
 		}
