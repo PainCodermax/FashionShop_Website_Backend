@@ -8,6 +8,7 @@ import (
 
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
+	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -68,7 +69,14 @@ func AddProduct() gin.HandlerFunc {
 					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 					return
 				}
+				imgArr := make([]string, 0, len(products.ListImage))
 				products.Product_ID = primitive.NewObjectID()
+				cld, _ := utils.Credentials()
+				for idx, img := range products.ListImage {
+					imageString := utils.UploadImage(cld, img, idx, ctx)
+					imgArr = append(imgArr, imageString)
+				}
+				products.ListImage = imgArr
 				_, anyerr := ProductCollection.InsertOne(ctx, products)
 				if anyerr != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "Not Created"})
