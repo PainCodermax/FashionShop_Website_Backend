@@ -3,7 +3,7 @@ package models
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Product struct {
-	Product_ID  primitive.ObjectID `bson:"_id"`
+	Product_ID  primitive.ObjectID `bson:"_id,omitempty"`
 	ProductName *string            `json:"productName,omitempty" bson:"product_name,omitempty"`
 	Price       *int               `json:"price,omitempty" bson:"price,omitempty"`
 	Detail      *string            `json:"detail,omitempty" bson:"detail,omitempty"`

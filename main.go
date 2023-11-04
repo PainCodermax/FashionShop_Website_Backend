@@ -22,6 +22,7 @@ func main() {
 		database.UserData(database.Client, "category"),
 	)
 
+	// gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(middleware.CORSMiddleware())

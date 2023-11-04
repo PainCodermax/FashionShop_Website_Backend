@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 )
 
 var ProductCollection *mongo.Collection = database.ProductData(database.Client, "product")
-var UserCollection *mongo.Collection = database.UserData(database.Client,"user")
+var UserCollection *mongo.Collection = database.UserData(database.Client, "user")
 
 func GetListProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -86,25 +87,79 @@ func AddProduct() gin.HandlerFunc {
 	}
 }
 
-// func UpdateProduct() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		if value, ok := c.Get("isAdmin"); ok {
-// 			if value == true {
-// 				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-// 				productId := c.Query("productId")
-// 				if productId == "" {
-// 					c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
-// 					c.Abort()
-// 					return
-// 				}
-// 				var editProduct models.Product
-// 				if err := c.BindJSON(&editProduct); err != nil {
+func UpdateProduct() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if value, ok := c.Get("isAdmin"); ok {
+			if value == true {
+				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+				defer cancel()
+				productId := c.Query("productId")
+				if productId == "" {
+					c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
+					c.Abort()
+					return
+				}
+				var editProduct models.Product
+				if err := c.BindJSON(&editProduct); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"Error": "cannot format input"})
+				}
+				oid, err := primitive.ObjectIDFromHex(productId)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+					return
+				}
+				filter := bson.D{primitive.E{Key: "_id", Value: oid}}
+				update := bson.M{
+					"$set": editProduct,
+				}
+				fmt.Println(update)
+				result, err := ProductCollection.UpdateOne(ctx, filter, update)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				c.JSON(http.StatusOK, result)
+				return
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
+			}
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
+		}
+	}
+}
 
-// 				}
+func DeleteProduct() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if value, ok := c.Get("isAdmin"); ok {
+			if value == true {
+				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+				defer cancel()
+				productId := c.Query("productId")
+				if productId == "" {
+					c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
+					c.Abort()
+					return
+				}
+				oid, err := primitive.ObjectIDFromHex(productId)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+					return
+				}
+				filter := bson.D{primitive.E{Key: "_id", Value: oid}}
+				result, err := ProductCollection.DeleteOne(ctx, filter)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				c.JSON(http.StatusOK, result)
+				return
 
-// 			}
-// 		} else {
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
-// 		}
-// 	}
-// }
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
+			}
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
+		}
+	}
+}
