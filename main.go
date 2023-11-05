@@ -9,10 +9,11 @@ import (
 	"github.com/PainCodermax/FashionShop_Website_Backend/middleware"
 	"github.com/PainCodermax/FashionShop_Website_Backend/routes"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	
+	godotenv.Load(".env")
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8000"
@@ -44,5 +45,3 @@ func main() {
 	router.GET("/instantbuy", app.InstantBuy())
 	log.Fatal(router.Run(":" + port))
 }
-
-
