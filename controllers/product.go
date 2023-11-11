@@ -24,13 +24,19 @@ func GetListProduct() gin.HandlerFunc {
 			if value == true {
 				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 				defer cancel()
+
+				// limit := c.Query("limit")
+				// offset := c.Query("query")
+				// opt := options.FindOptions{
+				// 	Limit: ,
+				// 	offset: ,
+				// }
 				result, err := ProductCollection.Find(ctx, bson.M{})
 				var listProduct []models.Product
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
 					return
 				}
-				
 				for result.Next(ctx) {
 					singleProduct := models.Product{}
 					if err := result.Decode(&singleProduct); err != nil {
@@ -41,14 +47,17 @@ func GetListProduct() gin.HandlerFunc {
 						})
 						return
 					}
+					println(singleProduct.CategoryID)
 					filter := bson.D{{"category_id", singleProduct.CategoryID}}
-					var category []models.Category
+					category := make([]models.Category, 1)
 					err := CategoryCollection.FindOne(ctx, filter).Decode(&category[0])
 					if err != nil {
 						c.JSON(http.StatusNotFound, gin.H{"error": "cannot found"})
 						return
 					}
-					singleProduct.CategoryMame = utils.ParsePoitnerToString(category[0].Name)
+					if len(category) > 0 {
+						singleProduct.CategoryMame = utils.ParsePoitnerToString(category[0].Name)
+					}
 					listProduct = append(listProduct, singleProduct)
 				}
 				c.JSON(http.StatusOK, models.ProductResponse{
