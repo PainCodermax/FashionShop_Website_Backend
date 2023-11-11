@@ -16,9 +16,15 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {
+
+	//product
 	incomingRoutes.POST("/admin/addproduct", controllers.AddProduct())
 	incomingRoutes.GET("/admin/getlistproduct", controllers.GetListProduct())
-	incomingRoutes.POST("/admin/addcategory", controllers.AddCategory())
 	incomingRoutes.PUT("/admin/product/update", controllers.UpdateProduct())
 	incomingRoutes.DELETE("/admin/product/delete", controllers.DeleteProduct())
+
+	//category
+	incomingRoutes.POST("/admin/addcategory", controllers.AddCategory())
+	incomingRoutes.GET("/admin/getcategory", controllers.GetCategory())
+	incomingRoutes.GET("/admin/getcategory/list", controllers.GetCategoryList())
 }

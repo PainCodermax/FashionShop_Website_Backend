@@ -30,7 +30,7 @@ func GetListProduct() gin.HandlerFunc {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
 					return
 				}
-
+				
 				for result.Next(ctx) {
 					singleProduct := models.Product{}
 					if err := result.Decode(&singleProduct); err != nil {
@@ -39,9 +39,16 @@ func GetListProduct() gin.HandlerFunc {
 							Message: "List product is empty",
 							Data:    []models.Product{},
 						})
-						println(err.Error())
 						return
 					}
+					filter := bson.D{{"category_id", singleProduct.CategoryID}}
+					var category []models.Category
+					err := CategoryCollection.FindOne(ctx, filter).Decode(&category[0])
+					if err != nil {
+						c.JSON(http.StatusNotFound, gin.H{"error": "cannot found"})
+						return
+					}
+					singleProduct.CategoryMame = utils.ParsePoitnerToString(category[0].Name)
 					listProduct = append(listProduct, singleProduct)
 				}
 				c.JSON(http.StatusOK, models.ProductResponse{
@@ -69,6 +76,7 @@ func AddProduct() gin.HandlerFunc {
 					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 					return
 				}
+
 				imgArr := make([]string, 0, len(products.ListImage))
 				products.Product_ID = primitive.NewObjectID()
 				cld, _ := utils.Credentials()
