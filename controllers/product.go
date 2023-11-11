@@ -160,7 +160,7 @@ func DeleteProduct() gin.HandlerFunc {
 			if value == true {
 				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 				defer cancel()
-				productId := c.Query("productId")
+				productId := c.Param("productID")
 				if productId == "" {
 					c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
 					c.Abort()

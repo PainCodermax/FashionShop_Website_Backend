@@ -21,7 +21,7 @@ func AdminRouter(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/admin/addproduct", controllers.AddProduct())
 	incomingRoutes.GET("/admin/getlistproduct", controllers.GetListProduct())
 	incomingRoutes.PUT("/admin/product/update", controllers.UpdateProduct())
-	incomingRoutes.DELETE("/admin/product/delete", controllers.DeleteProduct())
+	incomingRoutes.DELETE("/admin/product/delete/:productId", controllers.DeleteProduct())
 
 	//category
 	incomingRoutes.POST("/admin/addcategory", controllers.AddCategory())
