@@ -28,7 +28,7 @@ func AddCategory() gin.HandlerFunc {
 					return
 				}
 				category.ID = primitive.NewObjectID()
-				category.CategoryId = utils.GenerateCode("CATE",5)
+				category.CategoryId = utils.GenerateCode("CATE", 5)
 
 				_, anyerr := CategoryCollection.InsertOne(ctx, category)
 				if anyerr != nil {
@@ -114,6 +114,37 @@ func GetCategoryList() gin.HandlerFunc {
 				c.JSON(http.StatusNotFound, gin.H{"error": "you don't have permission !"})
 				return
 			}
+		}
+	}
+}
+
+func UpdateCategory() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if value, ok := c.Get("isAdmin"); ok {
+			if value == true {
+				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+				defer cancel()
+				categoryId := c.Param("categoryId")
+				var category models.Category
+				if err := c.BindJSON(&category); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
+					return
+				}
+				filter := bson.D{{"category_id", categoryId}}
+				update := bson.M{"$set": category}
+
+				result, err := CategoryCollection.UpdateOne(ctx, filter, update)
+
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				c.JSON(http.StatusOK, result)
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update category"})
+			}
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "you don't have permission"})
 		}
 	}
 }

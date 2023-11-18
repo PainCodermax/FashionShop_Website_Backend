@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var ProductCollection *mongo.Collection = database.ProductData(database.Client, "product")
@@ -25,18 +26,26 @@ func GetListProduct() gin.HandlerFunc {
 				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 				defer cancel()
 
-				// limit := c.Query("limit")
-				// offset := c.Query("query")
-				// opt := options.FindOptions{
-				// 	Limit: ,
-				// 	offset: ,
-				// }
-				result, err := ProductCollection.Find(ctx, bson.M{})
+				limit, _ := utils.ParseStringToIn64(c.Query("limit"))
+				offset, _ := utils.ParseStringToIn64(c.Query("query"))
+				if limit == 0 {
+					limit = 20
+				}
+				if offset == 0 {
+					offset = 0
+				}
+
+				opt := options.FindOptions{
+					Limit: utils.ParseIn64ToPointer(limit),
+					Skip:  utils.ParseIn64ToPointer(offset * limit),
+				}
+				result, err := ProductCollection.Find(ctx, bson.M{}, &opt)
 				var listProduct []models.Product
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
 					return
 				}
+				totalCount, _ := ProductCollection.CountDocuments(ctx, bson.M{})
 				for result.Next(ctx) {
 					singleProduct := models.Product{}
 					if err := result.Decode(&singleProduct); err != nil {
@@ -64,6 +73,7 @@ func GetListProduct() gin.HandlerFunc {
 					Status:  200,
 					Message: "Get List product success",
 					Data:    listProduct,
+					Total:   int(totalCount),
 				})
 			}
 			if value == false {
@@ -87,7 +97,7 @@ func AddProduct() gin.HandlerFunc {
 				}
 
 				imgArr := make([]string, 0, len(products.ListImage))
-				products.Product_ID = primitive.NewObjectID()
+				products.Product_ID = utils.GenerateCode("PRO", 5)
 				cld, _ := utils.Credentials()
 				for idx, img := range products.ListImage {
 					imageString := utils.UploadImage(cld, img, idx, ctx)
@@ -118,10 +128,9 @@ func UpdateProduct() gin.HandlerFunc {
 			if value == true {
 				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 				defer cancel()
-				productId := c.Query("productId")
+				productId := c.Param("productId")
 				if productId == "" {
 					c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
-					c.Abort()
 					return
 				}
 				var editProduct models.Product

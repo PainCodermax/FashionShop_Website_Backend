@@ -11,7 +11,7 @@ type Category struct {
 	Name       *string            `json:"name"`
 	Detail     *string            `json:"detail"`
 	CategoryId string             `json:"categoryId,omitempty" bson:"category_id,omitempty"`
-	IsMen      bool               `json:"isMen,omitempty"`
+	Gender     string             `json:"gender,omitempty" bson:"gender,omitempty"`
 	Created_At time.Time          `json:"created_at"`
 	Updated_At time.Time          `json:"updtaed_at"`
 }
