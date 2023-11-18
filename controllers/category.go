@@ -130,6 +130,7 @@ func UpdateCategory() gin.HandlerFunc {
 					c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
 					return
 				}
+				println(categoryId)
 				filter := bson.D{{"category_id", categoryId}}
 				update := bson.M{"$set": category}
 
@@ -158,6 +159,6 @@ func UpdateCategory() gin.HandlerFunc {
 // 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 // 			return
 // 		}
-		
+
 // 	}
 // }

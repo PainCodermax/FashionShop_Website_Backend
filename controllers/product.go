@@ -138,29 +138,25 @@ func UpdateProduct() gin.HandlerFunc {
 				var editProduct models.Product
 				if err := c.BindJSON(&editProduct); err != nil {
 					c.JSON(http.StatusBadRequest, gin.H{"Error": "cannot format input"})
-				}
-				oid, err := primitive.ObjectIDFromHex(productId)
-				if err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+
+					filter := bson.D{primitive.E{Key: "category_id", Value: productId}}
+					update := bson.M{
+						"$set": editProduct,
+					}
+					fmt.Println(update)
+					result, err := ProductCollection.UpdateOne(ctx, filter, update)
+					if err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+						return
+					}
+					c.JSON(http.StatusOK, result)
 					return
+				} else {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
 				}
-				filter := bson.D{primitive.E{Key: "_id", Value: oid}}
-				update := bson.M{
-					"$set": editProduct,
-				}
-				fmt.Println(update)
-				result, err := ProductCollection.UpdateOne(ctx, filter, update)
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-				c.JSON(http.StatusOK, result)
-				return
 			} else {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
 			}
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
 		}
 	}
 }
