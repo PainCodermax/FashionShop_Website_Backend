@@ -27,7 +27,9 @@ func GetListProduct() gin.HandlerFunc {
 				defer cancel()
 
 				limit, _ := utils.ParseStringToIn64(c.Query("limit"))
-				offset, _ := utils.ParseStringToIn64(c.Query("query"))
+				offset, _ := utils.ParseStringToIn64(c.Query("offset"))
+				println(limit)
+				println(offset)
 				if limit == 0 {
 					limit = 20
 				}
