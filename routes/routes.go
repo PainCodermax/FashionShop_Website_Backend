@@ -26,5 +26,5 @@ func AdminRouter(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/admin/addcategory", controllers.AddCategory())
 	incomingRoutes.GET("/admin/getcategory", controllers.GetCategory())
 	incomingRoutes.GET("/admin/getcategory/list", controllers.GetCategoryList())
-	incomingRoutes.PUT("/admin/updatecategory", controllers.UpdateCategory())
+	incomingRoutes.PUT("/admin/updatecategory/:categoryId", controllers.UpdateCategory())
 }
