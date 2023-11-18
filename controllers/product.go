@@ -11,7 +11,6 @@ import (
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -173,12 +172,7 @@ func DeleteProduct() gin.HandlerFunc {
 					c.Abort()
 					return
 				}
-				oid, err := primitive.ObjectIDFromHex(productId)
-				if err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
-					return
-				}
-				filter := bson.D{primitive.E{Key: "_id", Value: oid}}
+				filter := bson.D{{"product_id", productId}}
 				result, err := ProductCollection.DeleteOne(ctx, filter)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
