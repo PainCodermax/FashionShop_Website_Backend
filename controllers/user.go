@@ -97,16 +97,16 @@ func SignUp() gin.HandlerFunc {
 			c.JSON(http.StatusNotFound, gin.H{"error": "email not found"})
 			return
 		}
-
-		fmt.Println(user)
-		fmt.Println(UserCollection.Name())
 		_, inserterr := UserCollection.InsertOne(ctx, user)
 		if inserterr != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "not created"})
 			return
 		}
 		defer cancel()
-		c.JSON(http.StatusCreated, "Successfully Signed Up!!")
+		c.JSON(http.StatusCreated, gin.H{
+			"message": "Successfully Signed Up!!",
+			"data":    user,
+		})
 	}
 }
 
