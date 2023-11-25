@@ -10,7 +10,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/signup", controllers.SignUp())
 	incomingRoutes.POST("/users/login", controllers.Login())
 	incomingRoutes.POST("/users/gettoken", controllers.GetNewToken())
-	// incomingRoutes.POST("/users/verifygmail", controllers.VerifyGmail())
+	incomingRoutes.POST("/users/verify", controllers.VerifyUser())
 
 }
 
