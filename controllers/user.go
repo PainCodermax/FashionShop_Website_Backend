@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -121,8 +120,8 @@ func VerifyUser() gin.HandlerFunc {
 			return
 		}
 
-		fifter := bson.D{{"user_code", request.User_Code}}
-		err := UserCollection.FindOne(ctx, fifter, nil).Decode(user)
+		fifter := bson.M{"user_code": request.User_Code}
+		err := UserCollection.FindOne(ctx, fifter).Decode(&user)
 		if err != nil {
 			log.Panic(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
@@ -131,8 +130,15 @@ func VerifyUser() gin.HandlerFunc {
 
 		if request.VerifyCode == user.VerifyCode {
 			user.IsVerified = true
-			c.JSON(http.StatusOK, gin.H{"message": "verify successfully"})
-			return
+			userUpdate := bson.M{
+				"$set": user,
+			}
+
+			_, err := UserCollection.UpdateOne(ctx, fifter, userUpdate)
+			if err == nil {
+				c.JSON(http.StatusOK, gin.H{"message": "verify successfully"})
+				return
+			}
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Cannot verify"})

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -142,8 +141,6 @@ func UpdateProduct() gin.HandlerFunc {
 				update := bson.M{
 					"$set": editProduct,
 				}
-				println("111")
-				fmt.Println(update)
 				result, err := ProductCollection.UpdateOne(ctx, filter, update)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
