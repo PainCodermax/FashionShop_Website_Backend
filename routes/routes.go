@@ -11,6 +11,12 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/login", controllers.Login())
 	incomingRoutes.POST("/users/gettoken", controllers.GetNewToken())
 	incomingRoutes.POST("/users/verify", controllers.VerifyUser())
+	incomingRoutes.POST("/users/forget-password", controllers.ForGotPassword())
+	incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
+
+	// product
+	incomingRoutes.GET("/users/getlistproduct", controllers.GetListProduct())
+
 
 }
 

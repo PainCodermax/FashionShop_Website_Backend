@@ -10,21 +10,21 @@ type User struct {
 	ID primitive.ObjectID `json:"_id" bson:"_id"`
 
 	UserCode      string  `json:"userCode,omitempty" bson:"user_code,omitempty"`
-	First_Name    *string `json:"first_name" validate:"required,min=2,max=30"`
-	Last_Name     *string `json:"last_name"  validate:"required,min=2,max=30"`
-	Password      *string `json:"password"`
-	Email         *string `json:"email"`
-	Phone         *string `json:"phone"      validate:"required"`
-	Token         *string `json:"token"`
-	Refresh_Token *string `json:"refresh_token"`
+	First_Name    *string `json:"first_name,omitempty" validate:"required,min=2,max=30"`
+	Last_Name     *string `json:"last_name,omitempty"  validate:"required,min=2,max=30"`
+	Password      *string `json:"password,omitempty"`
+	Email         *string `json:"email,omitempty"`
+	Phone         *string `json:"phone,omitempty"      validate:"required"`
+	Token         *string `json:"token,omitempty"`
+	Refresh_Token *string `json:"refresh_token,omitempty"`
 
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`
 
-	User_ID         string    `json:"user_id"`
+	User_ID         string    `json:"user_id,omitempty"`
 	Cart            Cart      `json:"cart,omitempty" bson:"cart,omitempty"`
-	Address_Details []Address `json:"address" bson:"address"`
-	Order_Status    []Order   `json:"orders" bson:"orders"`
+	Address_Details []Address `json:"address,omitempty" bson:"address"`
+	Order_Status    []Order   `json:"orders,omitempty" bson:"orders"`
 	IsAdmin         bool      `json:"isAdmin,omitempty" bson:"is_admin,omitempty"`
 	VerifyCode      string    `json:"verifyCode,omitempty" bson:"verify_code,omitempty"`
 	IsVerified      bool      `json:"isVerified,omitempty" bson:"is_verified,omitempty"`

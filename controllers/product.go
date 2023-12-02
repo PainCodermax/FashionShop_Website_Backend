@@ -19,69 +19,69 @@ var UserCollection *mongo.Collection = database.UserData(database.Client, "user"
 
 func GetListProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if value, ok := c.Get("isAdmin"); ok {
-			if value == true {
-				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-				defer cancel()
+		// if value, ok := c.Get("isAdmin"); ok {
+		// 	if value == true {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
 
-				limit, _ := utils.ParseStringToIn64(c.Query("limit"))
-				offset, _ := utils.ParseStringToIn64(c.Query("offset"))
-				println(limit)
-				println(offset)
-				if limit == 0 {
-					limit = 20
-				}
-				if offset == 0 {
-					offset = 0
-				}
+		limit, _ := utils.ParseStringToIn64(c.Query("limit"))
+		offset, _ := utils.ParseStringToIn64(c.Query("offset"))
+		println(limit)
+		println(offset)
+		if limit == 0 {
+			limit = 20
+		}
+		if offset == 0 {
+			offset = 0
+		}
 
-				opt := options.FindOptions{
-					Limit: utils.ParseIn64ToPointer(limit),
-					Skip:  utils.ParseIn64ToPointer(offset * limit),
-				}
-				result, err := ProductCollection.Find(ctx, bson.M{}, &opt)
-				var listProduct []models.Product
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
-					return
-				}
-				totalCount, _ := ProductCollection.CountDocuments(ctx, bson.M{})
-				for result.Next(ctx) {
-					singleProduct := models.Product{}
-					if err := result.Decode(&singleProduct); err != nil {
-						c.JSON(http.StatusInternalServerError, models.ProductResponse{
-							Status:  500,
-							Message: "List product is empty",
-							Data:    []models.Product{},
-						})
-						return
-					}
-					println(singleProduct.CategoryID)
-					filter := bson.D{{"category_id", singleProduct.CategoryID}}
-					category := make([]models.Category, 1)
-					err := CategoryCollection.FindOne(ctx, filter).Decode(&category[0])
-					if err != nil {
-						c.JSON(http.StatusNotFound, gin.H{"error": "cannot found"})
-						return
-					}
-					if len(category) > 0 {
-						singleProduct.CategoryMame = utils.ParsePoitnerToString(category[0].Name)
-					}
-					listProduct = append(listProduct, singleProduct)
-				}
-				c.JSON(http.StatusOK, models.ProductResponse{
-					Status:  200,
-					Message: "Get List product success",
-					Data:    listProduct,
-					Total:   int(totalCount),
+		opt := options.FindOptions{
+			Limit: utils.ParseIn64ToPointer(limit),
+			Skip:  utils.ParseIn64ToPointer(offset * limit),
+		}
+		result, err := ProductCollection.Find(ctx, bson.M{}, &opt)
+		var listProduct []models.Product
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
+			return
+		}
+		totalCount, _ := ProductCollection.CountDocuments(ctx, bson.M{})
+		for result.Next(ctx) {
+			singleProduct := models.Product{}
+			if err := result.Decode(&singleProduct); err != nil {
+				c.JSON(http.StatusInternalServerError, models.ProductResponse{
+					Status:  500,
+					Message: "List product is empty",
+					Data:    []models.Product{},
 				})
-			}
-			if value == false {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Not have authorization"})
 				return
 			}
+			println(singleProduct.CategoryID)
+			filter := bson.D{{"category_id", singleProduct.CategoryID}}
+			category := make([]models.Category, 1)
+			err := CategoryCollection.FindOne(ctx, filter).Decode(&category[0])
+			if err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "cannot found"})
+				return
+			}
+			if len(category) > 0 {
+				singleProduct.CategoryMame = utils.ParsePoitnerToString(category[0].Name)
+			}
+			listProduct = append(listProduct, singleProduct)
 		}
+		c.JSON(http.StatusOK, models.ProductResponse{
+			Status:  200,
+			Message: "Get List product success",
+			Data:    listProduct,
+			Total:   int(totalCount),
+		})
 	}
+	// 	if value == false {
+	// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not have authorization"})
+	// 		return
+	// 	}
+	// }
+	// }
 }
 
 func AddProduct() gin.HandlerFunc {

@@ -209,21 +209,50 @@ func ForGotPassword() gin.HandlerFunc {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
 		var user models.User
-		var founduser models.User
+		var foundUser models.User
 		if err := c.BindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err})
 			return
 		}
-		err := UserCollection.FindOne(ctx, bson.M{"refresh_token": *user.Refresh_Token}).Decode(&founduser)
+		err := UserCollection.FindOne(ctx, bson.M{"email": *user.Email}).Decode(&foundUser)
 		defer cancel()
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
 			return
 		}
-		token, _ := generate.AccessTokenGenerator(*founduser.Email, *founduser.First_Name, *founduser.Last_Name, founduser.User_ID, founduser.IsAdmin)
+		mailErr := email.SendOPTMail(*user.Email, user.VerifyCode, false)
+		if mailErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "email not found"})
+			return
+		}
 		defer cancel()
-		generate.UpdateAccessToken(token, founduser.User_ID)
-		founduser.Token = &token
-		c.JSON(http.StatusOK, founduser)
+		c.JSON(http.StatusOK, gin.H{"message": "verify successfully"})
+	}
+}
+
+func UpdatePassWord() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		var user models.User
+		var foundUser models.User
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
+
+		err := UserCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
+			return
+		}
+		filter := bson.D{{"email", user.Email}}
+		update := bson.M{"$set": user}
+		result, err := UserCollection.UpdateOne(ctx, filter, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, result)
 	}
 }
