@@ -77,44 +77,44 @@ func GetCategory() gin.HandlerFunc {
 
 func GetCategoryList() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if value, ok := c.Get("isAdmin"); ok {
-			if value == true {
-				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-				defer cancel()
-				isMen, error := utils.ParseStringToBool(c.Query("isMen"))
-				filter := bson.D{}
-				if error == nil {
-					filter = bson.D{{"is_men", isMen}}
-				}
-				var categoryList []models.Category
-				result, err := CategoryCollection.Find(ctx, filter)
-				if err != nil {
-					c.JSON(http.StatusNotFound, gin.H{"message": "cannot get category list !!"})
-					return
-				}
-
-				for result.Next(ctx) {
-					singleCategory := models.Category{}
-					if err := result.Decode(&singleCategory); err != nil {
-						c.JSON(http.StatusInternalServerError, models.CategoryResponse{
-							Status:  500,
-							Message: "List product is empty",
-							Data:    []models.Category{},
-						})
-					}
-					categoryList = append(categoryList, singleCategory)
-				}
-				c.JSON(http.StatusOK, models.CategoryResponse{
-					Status:  200,
-					Message: "Get list category successfully",
-					Data:    categoryList,
-				})
-
-			} else {
-				c.JSON(http.StatusNotFound, gin.H{"error": "you don't have permission !"})
-				return
-			}
+		// if value, ok := c.Get("isAdmin"); ok {
+		// 	if value == true {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		isMen, error := utils.ParseStringToBool(c.Query("isMen"))
+		filter := bson.D{}
+		if error == nil {
+			filter = bson.D{{"is_men", isMen}}
 		}
+		var categoryList []models.Category
+		result, err := CategoryCollection.Find(ctx, filter)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "cannot get category list !!"})
+			return
+		}
+
+		for result.Next(ctx) {
+			singleCategory := models.Category{}
+			if err := result.Decode(&singleCategory); err != nil {
+				c.JSON(http.StatusInternalServerError, models.CategoryResponse{
+					Status:  500,
+					Message: "List product is empty",
+					Data:    []models.Category{},
+				})
+			}
+			categoryList = append(categoryList, singleCategory)
+		}
+		c.JSON(http.StatusOK, models.CategoryResponse{
+			Status:  200,
+			Message: "Get list category successfully",
+			Data:    categoryList,
+		})
+
+		// } else {
+		// 	c.JSON(http.StatusNotFound, gin.H{"error": "you don't have permission !"})
+		// 	return
+		// }
+		// }
 	}
 }
 
