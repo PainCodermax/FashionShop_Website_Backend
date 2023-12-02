@@ -65,18 +65,27 @@ func (sender *GmailSender) SendEmail(
 	return e.Send(smtpServerAddress, smtpAuth)
 }
 
-func SendOPTMail(userEmail string, otp string) error {
+func SendOPTMail(userEmail string, otp string, isVerify bool) error {
 	emailSenderName := os.Getenv("EMAIL_SENDER_NAME")
 	emailSenderAddress := os.Getenv("EMAIL_SENDER_ADDRESS")
 	emailSenderPassword := os.Getenv("EMAIL_SENDER_PASSWORD")
 
 	sender := NewGmailSender(emailSenderName, emailSenderAddress, emailSenderPassword)
 	subject := "YOUR OTP"
-	content := `
-	<h1>Hello</h1>
-	<p>This is Your OTP %s</p>
-	`
-	content = fmt.Sprintf(content, otp)
+	var content string
+	if isVerify {
+		content = `
+			<h1>Welcome to Blawol </h1>
+			<p>This is Your OTP %s</p>
+			`
+		content = fmt.Sprintf(content, otp)
+	} else {
+		content = `
+			<h1>Please enter your OTP to reset password </h1>
+			<p>This is Your OTP %s</p>
+			`
+		content = fmt.Sprintf(content, otp)
+	}
 	to := []string{userEmail}
 
 	err := sender.SendEmail(subject, content, to, nil, nil, nil)

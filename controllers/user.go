@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -12,9 +13,68 @@ import (
 	generate "github.com/PainCodermax/FashionShop_Website_Backend/tokens"
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 )
+
+var Validate = validator.New()
+
+func HashPassword(password string) string {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		log.Panic(err)
+	}
+	return string(bytes)
+}
+
+func VerifyPassword(userpassword string, givenpassword string) (bool, string) {
+	err := bcrypt.CompareHashAndPassword([]byte(givenpassword), []byte(userpassword))
+	valid := true
+	msg := ""
+	if err != nil {
+		msg = "Login Or Passowrd is Incorerct"
+		valid = false
+	}
+	return valid, msg
+}
+
+func Login() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		var user models.User
+		var founduser models.User
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
+		err := UserCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&founduser)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error":  "login or password incorrect",
+				"status": 401,
+			})
+			return
+		}
+		PasswordIsValid, msg := VerifyPassword(*user.Password, *founduser.Password)
+		defer cancel()
+		if !PasswordIsValid {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error":  msg,
+				"status": 401})
+			fmt.Println(msg)
+			return
+		}
+		token, refreshToken, _ := generate.TokenGenerator(*founduser.Email, *founduser.First_Name, *founduser.Last_Name, founduser.User_ID, founduser.IsAdmin)
+		defer cancel()
+		generate.UpdateAllTokens(token, refreshToken, founduser.User_ID)
+		founduser.Refresh_Token = &refreshToken
+		c.JSON(http.StatusOK, founduser)
+	}
+}
 
 func GetNewToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -86,12 +146,11 @@ func SignUp() gin.HandlerFunc {
 		token, refreshtoken, _ := generate.TokenGenerator(*user.Email, *user.First_Name, *user.Last_Name, user.User_ID, user.IsAdmin)
 		user.Token = &token
 		user.Refresh_Token = &refreshtoken
-		user.UserCart = make([]models.ProductUser, 0)
 		user.Address_Details = make([]models.Address, 0)
 		user.Order_Status = make([]models.Order, 0)
 		user.VerifyCode = utils.GenerateCode("VRF", 6)
 
-		mailErr := email.SendOPTMail(*user.Email, user.VerifyCode)
+		mailErr := email.SendOPTMail(*user.Email, user.VerifyCode, true)
 		if mailErr != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "email not found"})
 			return
@@ -142,5 +201,29 @@ func VerifyUser() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Cannot verify"})
+	}
+}
+
+func ForGotPassword() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		var user models.User
+		var founduser models.User
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
+		err := UserCollection.FindOne(ctx, bson.M{"refresh_token": *user.Refresh_Token}).Decode(&founduser)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
+			return
+		}
+		token, _ := generate.AccessTokenGenerator(*founduser.Email, *founduser.First_Name, *founduser.Last_Name, founduser.User_ID, founduser.IsAdmin)
+		defer cancel()
+		generate.UpdateAccessToken(token, founduser.User_ID)
+		founduser.Token = &token
+		c.JSON(http.StatusOK, founduser)
 	}
 }
