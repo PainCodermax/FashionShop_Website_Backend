@@ -15,7 +15,6 @@ import (
 )
 
 var ProductCollection *mongo.Collection = database.ProductData(database.Client, "product")
-var UserCollection *mongo.Collection = database.UserData(database.Client, "user")
 
 func GetListProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -184,5 +183,26 @@ func DeleteProduct() gin.HandlerFunc {
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot Update product"})
 		}
+	}
+}
+
+func GetProduct() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		var foundProduct models.Product
+		productId := c.Param("productId")
+		if productId == "" {
+			c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
+			c.Abort()
+			return
+		}
+		filter := bson.D{{"product_id", productId}}
+		err := ProductCollection.FindOne(ctx, filter).Decode(foundProduct)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, foundProduct)
 	}
 }

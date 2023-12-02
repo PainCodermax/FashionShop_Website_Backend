@@ -1,22 +1,21 @@
 package controllers
 
-import (
-	"go.mongodb.org/mongo-driver/mongo"
-)
+// import (
+// 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
+// 	"github.com/gin-gonic/gin"
+// 	"go.mongodb.org/mongo-driver/mongo"
+// )
 
-type Application struct {
-	prodCollection     *mongo.Collection
-	userCollection     *mongo.Collection
-	categoryCollection *mongo.Collection
-}
+// var CartCollection *mongo.Collection = database.UserData(database.Client, "cart")
 
-func NewApplication(prodCollection, userCollection, categoryCollection *mongo.Collection) *Application {
-	return &Application{
-		prodCollection:     prodCollection,
-		userCollection:     userCollection,
-		categoryCollection: CategoryCollection,
-	}
-}
+// func AddToCart() gin.HandlerFunc{
+
+// } 
+
+// func createCart(userID) error {
+	
+// }
+
 
 // func (app *Application) AddToCart() gin.HandlerFunc {
 // 	return func(c *gin.Context) {

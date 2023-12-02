@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/email"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models/query"
@@ -16,10 +17,12 @@ import (
 	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var Validate = validator.New()
+var UserCollection *mongo.Collection = database.UserData(database.Client, "user")
 
 func HashPassword(password string) string {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)

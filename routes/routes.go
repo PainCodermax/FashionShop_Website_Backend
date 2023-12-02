@@ -15,9 +15,14 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
 
 	// product
-	incomingRoutes.GET("/users/getlistproduct", controllers.GetListProduct())
+	incomingRoutes.GET("/users/product/list", controllers.GetListProduct())
+	incomingRoutes.GET("/users/product", controllers.GetProduct())
 
+	//category
+	incomingRoutes.GET("/users/getcategory/list", controllers.GetCategoryList())
 
+	//cart
+	incomingRoutes.GET("/user/cart")
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {
