@@ -95,7 +95,7 @@ func createCart(ctx context.Context, userID string) (error, string) {
 	return nil, cartID
 }
 
-// func GetCart() gin.HandlerFunc{
+// func GetCart() gin.HandlerFunc {
 // 	return func(c *gin.Context) {
 // 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 // 		defer cancel()
@@ -104,11 +104,19 @@ func createCart(ctx context.Context, userID string) (error, string) {
 // 			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
 // 			return
 // 		}
+// 		var cart models.Cart
+// 		var items []models.CartItem
+// 		err := CartCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&cart)
+
+// 		if err != nil {
+// 			c.JSON(http.StatusNotFound, gin.H{"message": "cart not found !"})
+// 			return
+// 		}
+
 
 
 // 	}
 // }
-
 
 // func (app *Application) AddToCart() gin.HandlerFunc {
 // 	return func(c *gin.Context) {

@@ -22,8 +22,8 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/users/getcategory/list", controllers.GetCategoryList())
 
 	//cart
-	incomingRoutes.POST("/user/cart/add", controllers.AddToCart())
-	// incomingRoutes.GET("user/cart", controllers.GetCart())
+	incomingRoutes.POST("/users/cart/add", controllers.AddToCart())
+	// incomingRoutes.GET("users/cart", controllers.GetCart())
 
 }
 
