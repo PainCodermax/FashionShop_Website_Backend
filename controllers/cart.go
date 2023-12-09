@@ -32,14 +32,42 @@ func AddToCart() gin.HandlerFunc {
 		if err := c.BindJSON(&cartItem); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
-		}	
+		}
 
-		err := CartCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(cart)
+		err := CartCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&cart)
 		if err == nil {
-			
+			var cartSearchItem models.CartItem
+			errItem := CartItemCollection.FindOne(ctx, bson.M{"product_id": cartItem.ProductID, "cart_id": cart.CartID}).Decode(&cartSearchItem)
+			if errItem != nil {
+				_, inserterr := CartItemCollection.InsertOne(ctx, cartItem)
+				if inserterr != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "not created"})
+					return
+				}
+				c.JSON(http.StatusCreated, gin.H{
+					"message": "Successfully add to card!!",
+				})
+			} else {
+				cartItem.ItemQuantity = cartSearchItem.ItemQuantity + cartItem.ItemQuantity
+				filter := bson.D{{"cart_item_id", cartSearchItem.CartItemID}}
+				update := bson.M{
+					"$set": cartItem,
+				}
+
+				_, err := CartItemCollection.UpdateOne(ctx, filter, update)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "not created"})
+					return
+				}
+				c.JSON(http.StatusCreated, gin.H{
+					"message": "Successfully add to card!!",
+				})
+
+			}
 		} else {
 			if err, cartID := createCart(ctx, utils.InterfaceToString(userID)); err != nil {
 				cartItem.CartID = cartID
+				cartItem.CartItemID = utils.GenerateCode("CARTITEM", 9)
 				_, inserterr := CartItemCollection.InsertOne(ctx, cartItem)
 				if inserterr != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "not created"})
@@ -66,6 +94,21 @@ func createCart(ctx context.Context, userID string) (error, string) {
 	}
 	return nil, cartID
 }
+
+// func GetCart() gin.HandlerFunc{
+// 	return func(c *gin.Context) {
+// 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+// 		defer cancel()
+// 		userID, ok := c.Get("uid")
+// 		if !ok {
+// 			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+// 			return
+// 		}
+
+
+// 	}
+// }
+
 
 // func (app *Application) AddToCart() gin.HandlerFunc {
 // 	return func(c *gin.Context) {

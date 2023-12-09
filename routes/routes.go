@@ -22,7 +22,9 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/users/getcategory/list", controllers.GetCategoryList())
 
 	//cart
-	incomingRoutes.GET("/user/cart")
+	incomingRoutes.POST("/user/cart/add", controllers.AddToCart())
+	// incomingRoutes.GET("user/cart", controllers.GetCart())
+
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {

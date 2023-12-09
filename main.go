@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/PainCodermax/FashionShop_Website_Backend/controllers"
 	"github.com/PainCodermax/FashionShop_Website_Backend/middleware"
 	"github.com/PainCodermax/FashionShop_Website_Backend/routes"
 	"github.com/gin-gonic/gin"
@@ -27,15 +26,11 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(middleware.CORSMiddleware())
+	// user
 	routes.UserRoutes(router)
 	router.Use(middleware.Authentication())
 
 	// admin
 	routes.AdminRouter(router)
-
-	router.POST("/addaddress", controllers.AddAddress())
-	router.PUT("/edithomeaddress", controllers.EditHomeAddress())
-	router.PUT("/editworkaddress", controllers.EditWorkAddress())
-	router.GET("/deleteaddresses", controllers.DeleteAddress())
 	log.Fatal(router.Run(":" + port))
 }
