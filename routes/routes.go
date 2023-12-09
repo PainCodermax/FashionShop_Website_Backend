@@ -16,7 +16,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 
 	// product
 	incomingRoutes.GET("/users/product/list", controllers.GetListProduct())
-	incomingRoutes.GET("/users/product", controllers.GetProduct())
+	incomingRoutes.GET("/users/product/:productId", controllers.GetProduct())
 
 	//category
 	incomingRoutes.GET("/users/getcategory/list", controllers.GetCategoryList())

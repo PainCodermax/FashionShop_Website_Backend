@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"reflect"
 	"strconv"
 	"time"
 )
@@ -39,7 +40,7 @@ func ParsePoitnerToString(ptr *string) string {
 	}
 }
 
-func ParseStringToIn64 (s string) (int64, error) {
+func ParseStringToIn64(s string) (int64, error) {
 	result, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return 0, err
@@ -47,10 +48,25 @@ func ParseStringToIn64 (s string) (int64, error) {
 	return result, nil
 }
 
-func ParseIn64ToPointer (n int64) *int64{
+func ParseIn64ToPointer(n int64) *int64 {
 	if n == 0 {
 		return nil
 	} else {
 		return &n
 	}
+}
+
+func InterfaceToString(value interface{}) string {
+	v := reflect.ValueOf(value)
+	if v.Kind() == reflect.String {
+		return v.String()
+	}
+	return ""
+}
+
+func parsePointerToString(ptr *string) string {
+	if ptr == nil {
+		return ""
+	}
+	return *ptr
 }

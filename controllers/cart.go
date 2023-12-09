@@ -1,21 +1,71 @@
 package controllers
 
-// import (
-// 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
-// 	"github.com/gin-gonic/gin"
-// 	"go.mongodb.org/mongo-driver/mongo"
-// )
+import (
+	"context"
+	"net/http"
+	"time"
 
-// var CartCollection *mongo.Collection = database.UserData(database.Client, "cart")
+	"github.com/PainCodermax/FashionShop_Website_Backend/database"
+	"github.com/PainCodermax/FashionShop_Website_Backend/models"
+	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
-// func AddToCart() gin.HandlerFunc{
+var CartCollection *mongo.Collection = database.DB(database.Client, "cart")
+var CartItemCollection *mongo.Collection = database.DB(database.Client, "cart_item")
 
-// } 
+func AddToCart() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		userID, ok := c.Get("uid")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+			return
+		}
 
-// func createCart(userID) error {
-	
-// }
+		var cartItem models.CartItem
+		var cart models.Cart
 
+		if err := c.BindJSON(&cartItem); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}	
+
+		err := CartCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(cart)
+		if err == nil {
+			
+		} else {
+			if err, cartID := createCart(ctx, utils.InterfaceToString(userID)); err != nil {
+				cartItem.CartID = cartID
+				_, inserterr := CartItemCollection.InsertOne(ctx, cartItem)
+				if inserterr != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "not created"})
+					return
+				}
+				c.JSON(http.StatusCreated, gin.H{
+					"message": "Successfully add to card!!",
+				})
+			}
+		}
+	}
+}
+
+func createCart(ctx context.Context, userID string) (error, string) {
+	cartID := utils.GenerateCode("CART", 5)
+	cart := models.Cart{
+		UserID: userID,
+		CartID: cartID,
+	}
+
+	_, err := CartCollection.InsertOne(ctx, cart)
+	if err != nil {
+		return err, ""
+	}
+	return nil, cartID
+}
 
 // func (app *Application) AddToCart() gin.HandlerFunc {
 // 	return func(c *gin.Context) {

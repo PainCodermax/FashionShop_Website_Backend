@@ -198,7 +198,7 @@ func GetProduct() gin.HandlerFunc {
 			return
 		}
 		filter := bson.D{{"product_id", productId}}
-		err := ProductCollection.FindOne(ctx, filter).Decode(foundProduct)
+		err := ProductCollection.FindOne(ctx, filter).Decode(&foundProduct)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
