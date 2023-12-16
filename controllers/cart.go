@@ -118,30 +118,33 @@ func GetCart() gin.HandlerFunc {
 			return
 		}
 
-		rs, findErr := CartItemCollection.Find(ctx, bson.M{"cart_id": cart.CartID})
+		filter := bson.D{{"cart_id", cart.CartID}}
+		rs, findErr := CartItemCollection.Find(ctx, filter)
 		if findErr != nil {
 			c.JSON(http.StatusNotFound, gin.H{"message": "Cannot get userID"})
 			return
 		}
-
 		total := 0
 		for rs.Next(ctx) {
-			singleCartItem := models.CartItem{}
-			if err := rs.Decode(singleCartItem); err != nil {
-				c.JSON(http.StatusInternalServerError, models.CartItemResponse{
-					Status:  500,
+			var singleCartItem models.CartItem
+			if err := rs.Decode(&singleCartItem); err != nil {
+				c.JSON(http.StatusOK, models.CartItemResponse{
+					Status:  200,
 					Message: "Cart is empty",
 					Data:    []models.CartItem{},
 				})
 				return
 			}
-			total = total + singleCartItem.Quantity
+			println(singleCartItem.Quantity)
+			total = total + singleCartItem.ItemQuantity
+
 			items = append(items, singleCartItem)
 		}
 		c.JSON(http.StatusOK, models.CartItemResponse{
 			Status:  200,
 			Message: "Get cart successfully",
 			Total:   total,
+			Data:    items,
 		})
 
 	}

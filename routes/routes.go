@@ -9,10 +9,7 @@ import (
 func LoginRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/signup", controllers.SignUp())
 	incomingRoutes.POST("/users/login", controllers.Login())
-	// incomingRoutes.POST("/users/gettoken", controllers.GetNewToken())
-	// incomingRoutes.POST("/users/verify", controllers.VerifyUser())
-	// incomingRoutes.POST("/users/forget-password", controllers.ForGotPassword())
-	// incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
+	incomingRoutes.POST("/users/verify", controllers.VerifyUser())
 }
 
 func UserRoutes(incomingRoutes *gin.Engine) {
@@ -20,7 +17,6 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	// incomingRoutes.POST("/users/login", controllers.Login())
 	incomingRoutes.POST("/users/gettoken", controllers.GetNewToken())
 	incomingRoutes.GET("/users/get-user", controllers.GetUser())
-	incomingRoutes.POST("/users/verify", controllers.VerifyUser())
 	incomingRoutes.POST("/users/forget-password", controllers.ForGotPassword())
 	// incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
 
