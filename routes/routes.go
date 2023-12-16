@@ -29,7 +29,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 
 	//cart
 	incomingRoutes.POST("/users/cart/add", controllers.AddToCart())
-	incomingRoutes.GET("users/cart", controllers.GetCart())
+	incomingRoutes.GET("/users/cart", controllers.GetCart())
 
 }
 
