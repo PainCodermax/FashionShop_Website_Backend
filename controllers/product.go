@@ -25,8 +25,6 @@ func GetListProduct() gin.HandlerFunc {
 
 		limit, _ := utils.ParseStringToIn64(c.Query("limit"))
 		offset, _ := utils.ParseStringToIn64(c.Query("offset"))
-		println(limit)
-		println(offset)
 		if limit == 0 {
 			limit = 20
 		}
@@ -55,7 +53,6 @@ func GetListProduct() gin.HandlerFunc {
 				})
 				return
 			}
-			println(singleProduct.CategoryID)
 			filter := bson.D{{"category_id", singleProduct.CategoryID}}
 			category := make([]models.Category, 1)
 			err := CategoryCollection.FindOne(ctx, filter).Decode(&category[0])

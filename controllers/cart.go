@@ -39,6 +39,8 @@ func AddToCart() gin.HandlerFunc {
 			var cartSearchItem models.CartItem
 			errItem := CartItemCollection.FindOne(ctx, bson.M{"product_id": cartItem.ProductID, "cart_id": cart.CartID}).Decode(&cartSearchItem)
 			if errItem != nil {
+				cartItem.CartID = cart.CartID
+				cartItem.CartItemID = utils.GenerateCode("CARTITEM", 9)
 				_, inserterr := CartItemCollection.InsertOne(ctx, cartItem)
 				if inserterr != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "not created"})
@@ -49,6 +51,8 @@ func AddToCart() gin.HandlerFunc {
 				})
 			} else {
 				cartItem.ItemQuantity = cartSearchItem.ItemQuantity + cartItem.ItemQuantity
+				cartItem.Price = cartSearchItem.Price + cartItem.Price
+				println(cartItem.ItemQuantity)
 				filter := bson.D{{"cart_item_id", cartSearchItem.CartItemID}}
 				update := bson.M{
 					"$set": cartItem,
@@ -62,7 +66,6 @@ func AddToCart() gin.HandlerFunc {
 				c.JSON(http.StatusCreated, gin.H{
 					"message": "Successfully add to card!!",
 				})
-
 			}
 		} else {
 			if err, cartID := createCart(ctx, utils.InterfaceToString(userID)); err != nil {
@@ -92,31 +95,57 @@ func createCart(ctx context.Context, userID string) (error, string) {
 	if err != nil {
 		return err, ""
 	}
+
 	return nil, cartID
+
 }
 
-// func GetCart() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-// 		defer cancel()
-// 		userID, ok := c.Get("uid")
-// 		if !ok {
-// 			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
-// 			return
-// 		}
-// 		var cart models.Cart
-// 		var items []models.CartItem
-// 		err := CartCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&cart)
+func GetCart() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		userID, ok := c.Get("uid")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+			return
+		}
+		var cart models.Cart
+		var items []models.CartItem
+		err := CartCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&cart)
 
-// 		if err != nil {
-// 			c.JSON(http.StatusNotFound, gin.H{"message": "cart not found !"})
-// 			return
-// 		}
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "cart not found !"})
+			return
+		}
 
+		rs, findErr := CartItemCollection.Find(ctx, bson.M{"cart_id": cart.CartID})
+		if findErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "Cannot get userID"})
+			return
+		}
 
+		total := 0
+		for rs.Next(ctx) {
+			singleCartItem := models.CartItem{}
+			if err := rs.Decode(singleCartItem); err != nil {
+				c.JSON(http.StatusInternalServerError, models.CartItemResponse{
+					Status:  500,
+					Message: "Cart is empty",
+					Data:    []models.CartItem{},
+				})
+				return
+			}
+			total = total + singleCartItem.Quantity
+			items = append(items, singleCartItem)
+		}
+		c.JSON(http.StatusOK, models.CartItemResponse{
+			Status:  200,
+			Message: "Get cart successfully",
+			Total:   total,
+		})
 
-// 	}
-// }
+	}
+}
 
 // func (app *Application) AddToCart() gin.HandlerFunc {
 // 	return func(c *gin.Context) {

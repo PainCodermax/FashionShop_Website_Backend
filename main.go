@@ -26,10 +26,11 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(middleware.CORSMiddleware())
+	routes.LoginRoutes(router)
 	// user
-	routes.UserRoutes(router)
-	router.Use(middleware.Authentication())
 
+	router.Use(middleware.Authentication())
+	routes.UserRoutes(router)
 	// admin
 	routes.AdminRouter(router)
 	log.Fatal(router.Run(":" + port))

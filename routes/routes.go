@@ -6,13 +6,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserRoutes(incomingRoutes *gin.Engine) {
+func LoginRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/signup", controllers.SignUp())
 	incomingRoutes.POST("/users/login", controllers.Login())
+	// incomingRoutes.POST("/users/gettoken", controllers.GetNewToken())
+	// incomingRoutes.POST("/users/verify", controllers.VerifyUser())
+	// incomingRoutes.POST("/users/forget-password", controllers.ForGotPassword())
+	// incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
+}
+
+func UserRoutes(incomingRoutes *gin.Engine) {
+	// incomingRoutes.POST("/users/signup", controllers.SignUp())
+	// incomingRoutes.POST("/users/login", controllers.Login())
 	incomingRoutes.POST("/users/gettoken", controllers.GetNewToken())
+	incomingRoutes.GET("/users/get-user", controllers.GetUser())
 	incomingRoutes.POST("/users/verify", controllers.VerifyUser())
 	incomingRoutes.POST("/users/forget-password", controllers.ForGotPassword())
-	incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
+	// incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
 
 	// product
 	incomingRoutes.GET("/users/product/list", controllers.GetListProduct())
@@ -23,7 +33,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 
 	//cart
 	incomingRoutes.POST("/users/cart/add", controllers.AddToCart())
-	// incomingRoutes.GET("users/cart", controllers.GetCart())
+	incomingRoutes.GET("users/cart", controllers.GetCart())
 
 }
 

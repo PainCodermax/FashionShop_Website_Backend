@@ -7,7 +7,7 @@ import (
 )
 
 type Cart struct {
-	ID primitive.ObjectID `json:"_id" bson:"_id"`
+	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 
 	CartID     string   `json:"cartID,omitempty" bson:"cart_id,omitempty"`
 	UserID     string   `json:"userID,omitempty" bson:"user_id,omitempty"`
@@ -20,7 +20,7 @@ type Cart struct {
 }
 
 type CartItem struct {
-	ID primitive.ObjectID `json:"_id" bson:"_id"`
+	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 
 	CartItemID   string `json:"cartItemID,omitempty" bson:"cart_item_id,omitempty"`
 	CartID       string `json:"cartID,omitempty" bson:"cart_id,omitempty"`
@@ -28,7 +28,7 @@ type CartItem struct {
 	ItemQuantity int    `json:"itemQuantity,omitempty" bson:"item_quantity,omitempty"`
 
 	ProductName *string  `json:"productName,omitempty" bson:"product_name,omitempty"`
-	Price       *int     `json:"price,omitempty" bson:"price,omitempty"`
+	Price       int      `json:"price,omitempty" bson:"price,omitempty"`
 	ListImage   []string `json:"listImage,omitempty" bson:"list_image,omitempty"`
-	Quantity    *int     `json:"quantity,omitempty" bson:"quantity,omitempty"`
+	Quantity    int      `json:"quantity,omitempty" bson:"quantity,omitempty"`
 }

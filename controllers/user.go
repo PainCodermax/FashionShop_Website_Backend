@@ -75,6 +75,7 @@ func Login() gin.HandlerFunc {
 		defer cancel()
 		generate.UpdateAllTokens(token, refreshToken, founduser.User_ID)
 		founduser.Refresh_Token = &refreshToken
+		fmt.Println(founduser)
 		c.JSON(http.StatusOK, founduser)
 	}
 }
@@ -145,7 +146,7 @@ func SignUp() gin.HandlerFunc {
 		user.Created_At, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		user.Updated_At, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		user.ID = primitive.NewObjectID()
-		user.User_ID = user.ID.Hex()
+		user.User_ID = utils.GenerateCode("USER", 5)
 		token, refreshtoken, _ := generate.TokenGenerator(*user.Email, *user.First_Name, *user.Last_Name, user.User_ID, user.IsAdmin)
 		user.Token = &token
 		user.Refresh_Token = &refreshtoken
@@ -233,7 +234,7 @@ func ForGotPassword() gin.HandlerFunc {
 	}
 }
 
-func UpdatePassWord() gin.HandlerFunc {
+func UpdateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
@@ -257,5 +258,24 @@ func UpdatePassWord() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, result)
+	}
+}
+
+func GetUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		userID, ok := c.Get("uid")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+			return
+		}
+		var foundUser models.User
+		err := UserCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&foundUser)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
+			return
+		}
+		c.JSON(http.StatusOK, foundUser)
 	}
 }
