@@ -12,7 +12,7 @@ type User struct {
 	UserCode      string  `json:"userCode,omitempty" bson:"user_code,omitempty"`
 	First_Name    *string `json:"first_name,omitempty" validate:"required,min=2,max=30"`
 	Last_Name     *string `json:"last_name,omitempty"  validate:"required,min=2,max=30"`
-	Password      *string `json:"password,omitempty"`
+	Password      string  `json:"password,omitempty"`
 	Email         *string `json:"email,omitempty"`
 	Phone         *string `json:"phone,omitempty"      validate:"required"`
 	Token         *string `json:"token,omitempty"`

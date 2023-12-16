@@ -62,7 +62,7 @@ func Login() gin.HandlerFunc {
 			})
 			return
 		}
-		PasswordIsValid, msg := VerifyPassword(*user.Password, *founduser.Password)
+		PasswordIsValid, msg := VerifyPassword(user.Password, founduser.Password)
 		defer cancel()
 		if !PasswordIsValid {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -139,8 +139,8 @@ func SignUp() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Phone is already in use"})
 			return
 		}
-		password := HashPassword(*user.Password)
-		user.Password = &password
+		password := HashPassword(user.Password)
+		user.Password = password
 
 		user.UserCode = utils.GenerateCode("USER", 5)
 		user.Created_At, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -231,6 +231,43 @@ func ForGotPassword() gin.HandlerFunc {
 		}
 		defer cancel()
 		c.JSON(http.StatusOK, gin.H{"message": "verify successfully"})
+	}
+}
+
+func UpdatePassWord() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		var user models.User
+		var foundUser models.User
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
+		err := UserCollection.FindOne(ctx, bson.M{"email": *user.Email}).Decode(&foundUser)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
+			return
+		}
+
+		if foundUser.Password == HashPassword(user.Password) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error":   "Duplicated passwords",
+				"message": "Password is used",
+			})
+			return
+		}
+
+		filter := bson.D{{"email", user.Email}}
+		update := bson.M{"$set": user}
+		result, err := UserCollection.UpdateOne(ctx, filter, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, result)
+
 	}
 }
 
