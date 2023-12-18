@@ -153,12 +153,13 @@ func DeleteCartItem() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
-		var cartItem models.CartItem
-		if err := c.BindJSON(&cartItem); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		cartItemID := c.Param("cartItemID")
+		if cartItemID == "" {
+			c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
+			c.Abort()
 			return
 		}
-		filter := bson.D{{"cart_item_id", cartItem.CartItemID}}
+		filter := bson.D{{"cart_item_id", cartItemID}}
 		result, err := CartItemCollection.DeleteOne(ctx, filter)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

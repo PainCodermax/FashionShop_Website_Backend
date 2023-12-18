@@ -31,7 +31,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/cart/add", controllers.AddToCart())
 	incomingRoutes.GET("/users/cart", controllers.GetCart())
 	incomingRoutes.PUT("/users/cart/update", controllers.UpdateCart())
-	incomingRoutes.DELETE("/users/cart/delete", controllers.DeleteCartItem())
+	incomingRoutes.DELETE("/users/cart/delete/:cartItemID", controllers.DeleteCartItem())
 
 }
 
