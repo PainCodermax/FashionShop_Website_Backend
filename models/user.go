@@ -18,6 +18,11 @@ type User struct {
 	Token         *string `json:"token,omitempty"`
 	Refresh_Token *string `json:"refresh_token,omitempty"`
 
+	//address
+	Province string `json:"province,omitempty"`
+	District string `json:"district,omitempty"`
+	Ward     string `json:"ward,omitempty"`
+
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`
 

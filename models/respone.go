@@ -14,8 +14,9 @@ type CategoryResponse struct {
 }
 
 type CartItemResponse struct {
-	Status  int        `json:"status"`
-	Message string     `json:"message"`
-	Data    []CartItem `json:"data"`
-	Total   int        `json:"total,omitempty"`
+	Status     int        `json:"status"`
+	Message    string     `json:"message"`
+	Data       []CartItem `json:"data"`
+	Total      int        `json:"total,omitempty"`
+	TotalPrice int        `json:"total_price,omitempty"`
 }

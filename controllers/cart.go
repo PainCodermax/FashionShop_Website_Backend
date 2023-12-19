@@ -50,8 +50,8 @@ func AddToCart() gin.HandlerFunc {
 					"message": "Successfully add to card!!",
 				})
 			} else {
-				cartItem.ItemQuantity = cartSearchItem.ItemQuantity + cartItem.ItemQuantity
 				cartItem.Price = cartSearchItem.Price + cartItem.Price*cartItem.ItemQuantity
+				cartItem.ItemQuantity = cartSearchItem.ItemQuantity + cartItem.ItemQuantity
 				filter := bson.D{{"cart_item_id", cartSearchItem.CartItemID}}
 				update := bson.M{
 					"$set": cartItem,
@@ -124,6 +124,7 @@ func GetCart() gin.HandlerFunc {
 			return
 		}
 		total := 0
+		totalPrice := 0
 		for rs.Next(ctx) {
 			var singleCartItem models.CartItem
 			if err := rs.Decode(&singleCartItem); err != nil {
@@ -134,16 +135,17 @@ func GetCart() gin.HandlerFunc {
 				})
 				return
 			}
-			println(singleCartItem.Quantity)
 			total = total + singleCartItem.ItemQuantity
+			totalPrice = totalPrice + singleCartItem.Price
 
 			items = append(items, singleCartItem)
 		}
 		c.JSON(http.StatusOK, models.CartItemResponse{
-			Status:  200,
-			Message: "Get cart successfully",
-			Total:   total,
-			Data:    items,
+			Status:     200,
+			Message:    "Get cart successfully",
+			Total:      total,
+			TotalPrice: totalPrice,
+			Data:       items,
 		})
 
 	}
