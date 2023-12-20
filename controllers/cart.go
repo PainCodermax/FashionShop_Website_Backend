@@ -41,6 +41,7 @@ func AddToCart() gin.HandlerFunc {
 			if errItem != nil {
 				cartItem.CartID = cart.CartID
 				cartItem.CartItemID = utils.GenerateCode("CARTITEM", 9)
+				cartItem.Price = cartItem.Price * cartItem.ItemQuantity
 				_, inserterr := CartItemCollection.InsertOne(ctx, cartItem)
 				if inserterr != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "not created"})
