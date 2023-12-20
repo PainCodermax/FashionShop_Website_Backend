@@ -69,6 +69,7 @@ func AddToCart() gin.HandlerFunc {
 		} else {
 			if err, cartID := createCart(ctx, utils.InterfaceToString(userID)); err != nil {
 				cartItem.CartID = cartID
+				cartItem.Price = cartItem.Price * cartItem.ItemQuantity
 				cartItem.CartItemID = utils.GenerateCode("CARTITEM", 9)
 				_, inserterr := CartItemCollection.InsertOne(ctx, cartItem)
 				if inserterr != nil {
@@ -181,6 +182,7 @@ func UpdateCart() gin.HandlerFunc {
 			return
 		}
 		cartItem.Price = cartItem.Price * cartItem.ItemQuantity
+
 		filter := bson.D{{"cart_item_id", cartItem.CartItemID}}
 		update := bson.M{
 			"$set": cartItem,
