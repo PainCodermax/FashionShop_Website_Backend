@@ -21,8 +21,20 @@ type CartItemResponse struct {
 	TotalPrice int        `json:"total_price,omitempty"`
 }
 
-type AddressResponse struct {
-	Code    int     `json:"code,omitempty"`
+type ProvinceResponse struct {
+	Code    int        `json:"code,omitempty"`
 	Message string     `json:"message,omitempty"`
-	Data    []Province `json:"province,omitempty"`
+	Data    []Province `json:"data,omitempty"`
+}
+
+type DistrictResponse struct {
+	Code    int        `json:"code,omitempty"`
+	Message string     `json:"message,omitempty"`
+	Data    []District `json:"data,omitempty"`
+}
+
+type WardResponse struct {
+	Code    int        `json:"code,omitempty"`
+	Message string     `json:"message,omitempty"`
+	Data    []Ward `json:"data,omitempty"`
 }

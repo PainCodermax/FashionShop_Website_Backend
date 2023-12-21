@@ -15,10 +15,10 @@ func LoginRoutes(incomingRoutes *gin.Engine) {
 }
 
 func UserRoutes(incomingRoutes *gin.Engine) {
-	// incomingRoutes.POST("/users/signup", controllers.SignUp())
-	// incomingRoutes.POST("/users/login", controllers.Login())
+	//users
 	incomingRoutes.POST("/users/get-token", controllers.GetNewToken())
 	incomingRoutes.GET("/users/get-user", controllers.GetUser())
+	incomingRoutes.PUT("/users/update-user", controllers.UpdateUser())
 
 	// product
 	incomingRoutes.GET("/users/product/list", controllers.GetListProduct())
@@ -32,6 +32,9 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/users/cart", controllers.GetCart())
 	incomingRoutes.PUT("/users/cart/update", controllers.UpdateCart())
 	incomingRoutes.DELETE("/users/cart/delete/:cartItemID", controllers.DeleteCartItem())
+
+	//order
+	// incomingRoutes.POST("/users/checkout", controllers.Checkout())
 
 }
 

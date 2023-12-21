@@ -238,20 +238,20 @@ func UpdatePassWord() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
-		var user models.User
+		var req query.UpdatePasswordRequest
 		var foundUser models.User
-		if err := c.BindJSON(&user); err != nil {
+		if err := c.BindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err})
 			return
 		}
-		err := UserCollection.FindOne(ctx, bson.M{"email": *user.Email}).Decode(&foundUser)
+		err := UserCollection.FindOne(ctx, bson.M{"email": req.Email}).Decode(&foundUser)
 		defer cancel()
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
 			return
 		}
 
-		if foundUser.Password == HashPassword(user.Password) {
+		if foundUser.Password == HashPassword(req.Password) {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error":   "Duplicated passwords",
 				"message": "Password is used",
@@ -259,8 +259,10 @@ func UpdatePassWord() gin.HandlerFunc {
 			return
 		}
 
-		filter := bson.D{{"email", user.Email}}
-		update := bson.M{"$set": user}
+		filter := bson.D{{"email", req.Email}}
+		update := bson.M{"$set": models.User{
+			Password: HashPassword(req.Password),
+		}}
 		result, err := UserCollection.UpdateOne(ctx, filter, update)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -275,6 +277,11 @@ func UpdateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
+		userID, ok := c.Get("uid")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+			return
+		}
 		var user models.User
 		var foundUser models.User
 		if err := c.BindJSON(&user); err != nil {
@@ -282,7 +289,7 @@ func UpdateUser() gin.HandlerFunc {
 			return
 		}
 
-		err := UserCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+		err := UserCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&foundUser)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
 			return
