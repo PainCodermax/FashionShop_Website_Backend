@@ -182,9 +182,19 @@ func UpdateCart() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		var foundCartItem models.CartItem
 		cartItem.Price = cartItem.Price * cartItem.ItemQuantity
 
 		filter := bson.D{{"cart_item_id", cartItem.CartItemID}}
+		println(cartItem.CartItemID)
+		findErr := CartItemCollection.FindOne(ctx, bson.M{"cart_item_id": cartItem.CartItemID}).Decode(&foundCartItem)
+		if findErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
+			return
+		}
+		price := foundCartItem.Price / foundCartItem.ItemQuantity
+		cartItem.Price = price * cartItem.ItemQuantity
+
 		update := bson.M{
 			"$set": cartItem,
 		}
