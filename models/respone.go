@@ -20,3 +20,7 @@ type CartItemResponse struct {
 	Total      int        `json:"total,omitempty"`
 	TotalPrice int        `json:"total_price,omitempty"`
 }
+
+type AddressResponse struct {
+	code string
+}

@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/client"
 	"github.com/PainCodermax/FashionShop_Website_Backend/middleware"
 	"github.com/PainCodermax/FashionShop_Website_Backend/routes"
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ func main() {
 	// 	database.UserData(database.Client, "user"),
 	// 	database.UserData(database.Client, "category"),
 	// )
-
+	client.Init()
 	// gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(gin.Logger())

@@ -10,6 +10,8 @@ func LoginRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/signup", controllers.SignUp())
 	incomingRoutes.POST("/users/login", controllers.Login())
 	incomingRoutes.POST("/users/verify", controllers.VerifyUser())
+	incomingRoutes.POST("/users/forget-password", controllers.ForGotPassword())
+	incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
 }
 
 func UserRoutes(incomingRoutes *gin.Engine) {
@@ -17,8 +19,6 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	// incomingRoutes.POST("/users/login", controllers.Login())
 	incomingRoutes.POST("/users/get-token", controllers.GetNewToken())
 	incomingRoutes.GET("/users/get-user", controllers.GetUser())
-	incomingRoutes.POST("/users/forget-password", controllers.ForGotPassword())
-	incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
 
 	// product
 	incomingRoutes.GET("/users/product/list", controllers.GetListProduct())
