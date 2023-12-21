@@ -125,9 +125,6 @@ func GetCart() gin.HandlerFunc {
 			c.JSON(http.StatusNotFound, gin.H{"message": "user not found !"})
 			return
 		}
-		cart.Province = user.Province
-		cart.District = user.District
-		cart.Ward = user.Ward
 
 		filter := bson.D{{"cart_id", cart.CartID}}
 		rs, findErr := CartItemCollection.Find(ctx, filter)
@@ -158,6 +155,9 @@ func GetCart() gin.HandlerFunc {
 			Total:      total,
 			TotalPrice: totalPrice,
 			Data:       items,
+			Province:   user.Province,
+			District:   user.District,
+			Ward:       user.Ward,
 		})
 
 	}
