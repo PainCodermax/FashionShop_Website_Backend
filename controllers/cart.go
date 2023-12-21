@@ -112,12 +112,22 @@ func GetCart() gin.HandlerFunc {
 		}
 		var cart models.Cart
 		var items []models.CartItem
+		var user models.User
 		err := CartCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&cart)
 
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"message": "cart not found !"})
 			return
 		}
+
+		userErr := UserCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+		if userErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "user not found !"})
+			return
+		}
+		cart.Province = user.Province
+		cart.District = user.District
+		cart.Ward = user.Ward
 
 		filter := bson.D{{"cart_id", cart.CartID}}
 		rs, findErr := CartItemCollection.Find(ctx, filter)

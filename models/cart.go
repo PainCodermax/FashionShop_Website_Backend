@@ -14,6 +14,10 @@ type Cart struct {
 	Quantity   int      `json:"quantity,omitempty" bson:"quantity,omitempty"`
 	TotalPrice int      `json:"totalPrice,omitempty" bson:"-"`
 	ItemList   CartItem `json:"itemList,omitempty" bson:"-"`
+	
+	Province   string   `json:"province,omitempty" bson:"-"`
+	District   string   `json:"district,omitempty" bson:"-"`
+	Ward       string   `json:"ward,omitempty" bson:"-"`
 
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`
