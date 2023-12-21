@@ -224,7 +224,7 @@ func ForGotPassword() gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
 			return
 		}
-		mailErr := email.SendOPTMail(*user.Email, user.VerifyCode, false)
+		mailErr := email.SendOPTMail(*user.Email, foundUser.VerifyCode, false)
 		if mailErr != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "email not found"})
 			return

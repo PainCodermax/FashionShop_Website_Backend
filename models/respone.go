@@ -22,5 +22,7 @@ type CartItemResponse struct {
 }
 
 type AddressResponse struct {
-	code string
+	Code    int     `json:"code,omitempty"`
+	Message string     `json:"message,omitempty"`
+	Data    []Province `json:"province,omitempty"`
 }

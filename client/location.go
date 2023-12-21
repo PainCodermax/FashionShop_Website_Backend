@@ -35,15 +35,16 @@ func Init() {
 	}
 
 	// Decode JSON response vào một map[string]interface{}
-	var data []models.Province
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+	var address models.AddressResponse
+	if err := json.NewDecoder(resp.Body).Decode(&address); err != nil {
 		fmt.Println("Lỗi khi decode JSON:", err)
 		return
 	}
 
 	// In ra dữ liệu hoặc lưu vào một map
-	for _, province := range data {
+	for _, province := range address.Data {
 		ProvinceMap[province.ProvinceID] = province.ProvinceName
+		fmt.Println("ok")
 		fmt.Print(province.ProvinceName)
 	}
 
