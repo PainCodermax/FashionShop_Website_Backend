@@ -9,13 +9,16 @@ import (
 type Order struct {
 	ID primitive.ObjectID `bson:"_id,omitempty"`
 
-	Product_ID string `json:"orderID,omitempty" bson:"order_id,omitempty"`
-	CartID     string `json:"cartID,omitempty" bson:"cart_id,omitempty"`
+	UserID  string `json:"user_id,omitempty" bson:"user_id,omitempty"`
+	OrderID string `json:"orderID,omitempty" bson:"order_id,omitempty"`
+	CartID  string `json:"cartID,omitempty" bson:"cart_id,omitempty"`
 
 	Quantity int    `json:"quantity,omitempty" bson:"quantity,omitempty"`
 	Price    int    `json:"price,omitempty" bson:"price,omitempty"`
 	Status   string `json:"status,omitempty" bson:"status,omitempty"`
-	PaymentMethod string `json:"payment"`
+	// PaymentMethod string `json:"payment"`
+	Items   []CartItem `json:"Items,omitempty" bson:"items,omitempty"`
+	Address string     `json:"address,omitempty"`
 
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`

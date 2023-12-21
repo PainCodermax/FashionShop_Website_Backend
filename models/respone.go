@@ -42,3 +42,9 @@ type WardResponse struct {
 	Message string `json:"message,omitempty"`
 	Data    []Ward `json:"data,omitempty"`
 }
+
+type OrderResponse struct {
+	Status  int     `json:"status"`
+	Message string  `json:"message"`
+	Data    []Order `json:"data"`
+}
