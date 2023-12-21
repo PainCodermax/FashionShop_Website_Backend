@@ -73,6 +73,7 @@ func Checkout() gin.HandlerFunc {
 			Price:   checkout.TotalPrice,
 			Status:  "SUCCESS",
 			Address: checkout.Address,
+			Quantity: checkout.Quantity,
 		}
 
 		_, anyerr := OrderCollection.InsertOne(ctx, newOrder)
@@ -80,7 +81,7 @@ func Checkout() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Not Created"})
 			return
 		}
-		c.JSON(http.StatusOK, "Checkout successfully")
+		c.JSON(http.StatusOK, gin.H{"message": "Checkout successfully"})
 	}
 }
 
@@ -94,11 +95,9 @@ func GetListOrder() gin.HandlerFunc {
 			return
 		}
 
-		rs, err := OrderCollection.Find(ctx, bson.M{
-			"$set": models.Order{
-				UserID: utils.InterfaceToString(userID),
-			},
-		}, nil)
+		rs, err := OrderCollection.Find(ctx, bson.D{{
+			"user_id", userID,
+		}})
 
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "cannot found"})
