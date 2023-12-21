@@ -150,8 +150,6 @@ func SignUp() gin.HandlerFunc {
 		token, refreshtoken, _ := generate.TokenGenerator(*user.Email, *user.First_Name, *user.Last_Name, user.User_ID, user.IsAdmin)
 		user.Token = &token
 		user.Refresh_Token = &refreshtoken
-		user.Address_Details = make([]models.Address, 0)
-		user.Order_Status = make([]models.Order, 0)
 		user.VerifyCode = utils.GenerateCode("VRF", 6)
 
 		mailErr := email.SendOPTMail(*user.Email, user.VerifyCode, true)
