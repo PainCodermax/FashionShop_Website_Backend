@@ -38,7 +38,7 @@ func Checkout() gin.HandlerFunc {
 		// 	return
 		// }
 
-		_, err := CartCollection.DeleteMany(ctx, filter, nil)
+		_, err := CartItemCollection.DeleteMany(ctx, filter, nil)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -66,13 +66,13 @@ func Checkout() gin.HandlerFunc {
 		}
 
 		newOrder := models.Order{
-			CartID:  checkout.CartID,
-			UserID:  utils.InterfaceToString(userID),
-			OrderID: utils.GenerateCode("ORD", 6),
-			Items:   checkout.CartItems,
-			Price:   checkout.TotalPrice,
-			Status:  "SUCCESS",
-			Address: checkout.Address,
+			CartID:   checkout.CartID,
+			UserID:   utils.InterfaceToString(userID),
+			OrderID:  utils.GenerateCode("ORD", 6),
+			Items:    checkout.CartItems,
+			Price:    checkout.TotalPrice,
+			Status:   "SUCCESS",
+			Address:  checkout.Address,
 			Quantity: checkout.Quantity,
 		}
 
