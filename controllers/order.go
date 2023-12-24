@@ -124,3 +124,27 @@ func GetListOrder() gin.HandlerFunc {
 
 	}
 }
+
+func CancelOrder() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		orderID := c.Param("orderId")
+		update := bson.M{
+			"$set": models.Order{
+				Status: "CANCELED",
+			},
+		}
+
+		rs, err := OrderCollection.UpdateOne(ctx, bson.D{{
+			"order_id", orderID,
+		}}, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.OrderResponse{
+				Message: "cannot cancel this order",
+			})
+			return
+		}
+		c.JSON(http.StatusOK, rs)
+	}
+}

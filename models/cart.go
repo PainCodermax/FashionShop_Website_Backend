@@ -9,7 +9,7 @@ import (
 type Cart struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 
-	CartID     string   `json:"cartID,omitempty" bson:"cart_id,omitempty"`
+	CartID     string   `json:"cartID,omitempty" bson:",omitempty"`
 	UserID     string   `json:"userID,omitempty" bson:"user_id,omitempty"`
 	Quantity   int      `json:"quantity,omitempty" bson:"quantity,omitempty"`
 	TotalPrice int      `json:"totalPrice,omitempty" bson:"-"`

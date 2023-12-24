@@ -10,6 +10,7 @@ import (
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -201,5 +202,67 @@ func GetProduct() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, foundProduct)
+	}
+}
+
+func SearchProduct() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		limit, _ := utils.ParseStringToIn64(c.Query("limit"))
+		offset, _ := utils.ParseStringToIn64(c.Query("offset"))
+		if limit == 0 {
+			limit = 20
+		}
+		if offset == 0 {
+			offset = 0
+		}
+		text := c.Query("text")
+
+		opt := options.FindOptions{
+			Limit: utils.ParseIn64ToPointer(limit),
+			Skip:  utils.ParseIn64ToPointer(offset * limit),
+		}
+
+		filter := bson.M{}
+		if text != "" {
+			filter["product_name"] = bson.M{"$regex": primitive.Regex{Pattern: text, Options: "i"}}
+		}
+
+		result, err := ProductCollection.Find(ctx, filter, &opt)
+		var listProduct []models.Product
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
+			return
+		}
+		totalCount, _ := ProductCollection.CountDocuments(ctx, bson.M{})
+		for result.Next(ctx) {
+			singleProduct := models.Product{}
+			if err := result.Decode(&singleProduct); err != nil {
+				c.JSON(http.StatusInternalServerError, models.ProductResponse{
+					Status:  500,
+					Message: "List product is empty",
+					Data:    []models.Product{},
+				})
+				return
+			}
+			filter := bson.D{{"category_id", singleProduct.CategoryID}}
+			category := make([]models.Category, 1)
+			err := CategoryCollection.FindOne(ctx, filter).Decode(&category[0])
+			if err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "cannot found"})
+				return
+			}
+			if len(category) > 0 {
+				singleProduct.CategoryMame = utils.ParsePoitnerToString(category[0].Name)
+			}
+			listProduct = append(listProduct, singleProduct)
+		}
+		c.JSON(http.StatusOK, models.ProductResponse{
+			Status:  200,
+			Message: "search products success",
+			Data:    listProduct,
+			Total:   int(totalCount),
+		})
 	}
 }
