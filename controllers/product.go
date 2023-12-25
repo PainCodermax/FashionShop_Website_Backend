@@ -266,3 +266,4 @@ func SearchProduct() gin.HandlerFunc {
 		})
 	}
 }
+

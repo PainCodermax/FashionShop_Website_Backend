@@ -18,7 +18,7 @@ type Order struct {
 	Status   string `json:"status,omitempty" bson:"status,omitempty"`
 	// PaymentMethod string `json:"payment"`
 	Items   []CartItem `json:"Items,omitempty" bson:"items,omitempty"`
-	Address string     `json:"address,omitempty"`
+	Address string     `json:"address,omitempty" bson:"address,omitempty"`
 
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`
