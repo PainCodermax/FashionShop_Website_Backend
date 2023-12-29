@@ -148,3 +148,26 @@ func CancelOrder() gin.HandlerFunc {
 		c.JSON(http.StatusOK, rs)
 	}
 }
+
+func GetOrder() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		orderID := c.Query("orderId")
+		var order models.Order
+		err := OrderCollection.FindOne(ctx, bson.D{{"order_id", orderID}}).Decode(&order)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.OrderResponse{
+				Message: "cannot find this order",
+			})
+			return
+		}
+		c.JSON(http.StatusOK, models.OrderResponse{
+			Status:  200,
+			Message: "Get List product success",
+			Data:    []models.Order{order},
+		})
+	}
+}
+
+

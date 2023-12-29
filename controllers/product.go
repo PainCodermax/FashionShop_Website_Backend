@@ -267,3 +267,58 @@ func SearchProduct() gin.HandlerFunc {
 	}
 }
 
+func GetProductByCategory() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		categoryID := c.Query("categoryId")
+		limit, _ := utils.ParseStringToIn64(c.Query("limit"))
+		offset, _ := utils.ParseStringToIn64(c.Query("offset"))
+		if categoryID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"Error": "missing category id"})
+			return
+		}
+		opt := options.FindOptions{
+			Limit: utils.ParseIn64ToPointer(limit),
+			Skip:  utils.ParseIn64ToPointer(offset * limit),
+		}
+		filter := bson.D{{"category_id", categoryID}}
+
+		result, err := ProductCollection.Find(ctx, filter, &opt)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
+			return
+		}
+		var listProduct []models.Product
+		totalCount, _ := ProductCollection.CountDocuments(ctx, bson.M{})
+		for result.Next(ctx) {
+			singleProduct := models.Product{}
+			if err := result.Decode(&singleProduct); err != nil {
+				c.JSON(http.StatusInternalServerError, models.ProductResponse{
+					Status:  500,
+					Message: "List product is empty",
+					Data:    []models.Product{},
+				})
+				return
+			}
+			filter := bson.D{{"category_id", singleProduct.CategoryID}}
+			category := make([]models.Category, 1)
+			err := CategoryCollection.FindOne(ctx, filter).Decode(&category[0])
+			if err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "cannot found"})
+				return
+			}
+			if len(category) > 0 {
+				singleProduct.CategoryMame = utils.ParsePoitnerToString(category[0].Name)
+			}
+			listProduct = append(listProduct, singleProduct)
+		}
+		c.JSON(http.StatusOK, models.ProductResponse{
+			Status:  200,
+			Message: "Get List product success",
+			Data:    listProduct,
+			Total:   int(totalCount),
+		})
+	}
+}
+

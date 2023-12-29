@@ -24,6 +24,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/users/product/list", controllers.GetListProduct())
 	incomingRoutes.GET("/users/product/:productId", controllers.GetProduct())
 	incomingRoutes.GET("/users/product", controllers.SearchProduct())
+	incomingRoutes.GET("/users/product-by-category", controllers.GetProductByCategory())
 
 	//category
 	incomingRoutes.GET("/users/get-category/list", controllers.GetCategoryList())
@@ -38,6 +39,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/checkout", controllers.Checkout())
 	incomingRoutes.GET("/users/orders", controllers.GetListOrder())
 	incomingRoutes.PUT("/users/orders/cancel/:orderId", controllers.CancelOrder())
+	incomingRoutes.GET("/users/orders/get-single", controllers.GetOrder())
 
 }
 
