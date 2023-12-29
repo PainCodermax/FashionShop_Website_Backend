@@ -47,4 +47,5 @@ type OrderResponse struct {
 	Status  int     `json:"status"`
 	Message string  `json:"message"`
 	Data    []Order `json:"data"`
+	Total   int       `json:"total,omitempty"`
 }

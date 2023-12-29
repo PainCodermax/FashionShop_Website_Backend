@@ -290,7 +290,7 @@ func GetProductByCategory() gin.HandlerFunc {
 			return
 		}
 		var listProduct []models.Product
-		totalCount, _ := ProductCollection.CountDocuments(ctx, bson.M{})
+		totalCount, _ := ProductCollection.CountDocuments(ctx, filter)
 		for result.Next(ctx) {
 			singleProduct := models.Product{}
 			if err := result.Decode(&singleProduct); err != nil {

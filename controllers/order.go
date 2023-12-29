@@ -6,11 +6,13 @@ import (
 	"time"
 
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
+	"github.com/PainCodermax/FashionShop_Website_Backend/email"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var OrderCollection *mongo.Collection = database.ProductData(database.Client, "order")
@@ -25,6 +27,11 @@ func Checkout() gin.HandlerFunc {
 			return
 		}
 
+		emailUser, ok := c.Get("email")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get email"})
+			return
+		}
 		var checkout models.RequestOrder
 		if err := c.BindJSON(&checkout); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -64,11 +71,12 @@ func Checkout() gin.HandlerFunc {
 				return
 			}
 		}
+		orderID := utils.GenerateCode("ORD", 6)
 
 		newOrder := models.Order{
 			CartID:   checkout.CartID,
 			UserID:   utils.InterfaceToString(userID),
-			OrderID:  utils.GenerateCode("ORD", 6),
+			OrderID:  orderID,
 			Items:    checkout.CartItems,
 			Price:    checkout.TotalPrice,
 			Status:   "SUCCESS",
@@ -79,6 +87,11 @@ func Checkout() gin.HandlerFunc {
 		_, anyerr := OrderCollection.InsertOne(ctx, newOrder)
 		if anyerr != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Not Created"})
+			return
+		}
+		mailErr := email.ConfirmOrder(utils.InterfaceToString(emailUser), orderID)
+		if mailErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "email not found"})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "Checkout successfully"})
@@ -130,6 +143,11 @@ func CancelOrder() gin.HandlerFunc {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
 		orderID := c.Param("orderId")
+		emailUser, ok := c.Get("email")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get email"})
+			return
+		}
 		update := bson.M{
 			"$set": models.Order{
 				Status: "CANCELED",
@@ -143,6 +161,11 @@ func CancelOrder() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, models.OrderResponse{
 				Message: "cannot cancel this order",
 			})
+			return
+		}
+		mailErr := email.CancelOrder(utils.InterfaceToString(emailUser), orderID)
+		if mailErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "email not found"})
 			return
 		}
 		c.JSON(http.StatusOK, rs)
@@ -170,4 +193,51 @@ func GetOrder() gin.HandlerFunc {
 	}
 }
 
+func GetAllOrder() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
 
+		limit, _ := utils.ParseStringToIn64(c.Query("limit"))
+		offset, _ := utils.ParseStringToIn64(c.Query("offset"))
+
+		if limit == 0 {
+			limit = 20
+		}
+		if offset == 0 {
+			offset = 0
+		}
+
+		opt := options.FindOptions{
+			Limit: utils.ParseIn64ToPointer(limit),
+			Skip:  utils.ParseIn64ToPointer(offset * limit),
+		}
+
+		rs, err := OrderCollection.Find(ctx, bson.M{}, &opt)
+		var orders []models.Order
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not get list"})
+			return
+		}
+		for rs.Next(ctx) {
+			order := models.Order{}
+			if err := rs.Decode(&order); err != nil {
+				c.JSON(http.StatusInternalServerError, models.OrderResponse{
+					Status:  500,
+					Message: "List order is empty",
+					Data:    []models.Order{},
+				})
+				return
+			}
+			orders = append(orders, order)
+		}
+		totalCount, _ := OrderCollection.CountDocuments(ctx, bson.M{})
+		c.JSON(http.StatusOK, models.OrderResponse{
+			Status:  200,
+			Message: "Get List product success",
+			Data:    orders,
+			Total:   int(totalCount),
+		})
+
+	}
+}

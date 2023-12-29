@@ -56,4 +56,7 @@ func AdminRouter(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/admin/get-category", controllers.GetCategory())
 	incomingRoutes.GET("/admin/get-category/list", controllers.GetCategoryList())
 	incomingRoutes.PUT("/admin/update-category/:categoryId", controllers.UpdateCategory())
+
+	//order
+	incomingRoutes.GET("/admin/orders/get-all-order", controllers.GetAllOrder())
 }
