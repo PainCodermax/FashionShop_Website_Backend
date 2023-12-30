@@ -6,4 +6,5 @@ type RequestOrder struct {
 	Address    string     `json:"address,omitempty"`
 	TotalPrice int        `json:"totalPice,omitempty"`
 	Quantity   int        `json:"quantity,omitempty"`
+	ShipFee    int        `json:"shipFee,omitempty" bson:"ship_fee,omitemty"`
 }

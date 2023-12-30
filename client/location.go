@@ -1,11 +1,13 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
+	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
 )
 
 func Init() {
@@ -27,7 +29,7 @@ func Init() {
 		return
 	}
 	req.Header.Add("token", token)
-	
+
 	// Thực hiện yêu cầu HTTP
 	resp, err := client.Do(req)
 	if err != nil {
@@ -54,4 +56,71 @@ func Init() {
 	}
 }
 
+func CheckShipingFee(province, district, ward string) int {
+	token := "5c4242e4-9bf5-11ee-96dc-de6f804954c9"
+	shopId := "4771536"
+	// Tạo HTTP client
+	client := &http.Client{}
 
+	// params := url.Values{}
+	// params.Set("paramKey", "paramValue")
+
+	// // Thêm tham số vào URL
+	// reqURL := "https://online-gateway.ghn.vn/shiip/public-api/master-data/province"
+	// reqURL += "?" + params.Encode()
+	districtInt, _ := utils.ParseStringToIn64(district)
+
+	payload := map[string]interface{}{
+		"service_type_id":  5,
+		"from_district_id": 1442,
+		"to_district_id":   districtInt,
+		"to_ward_code":     ward,
+		"height":           20,
+		"length":           30,
+		"weight":           3000,
+		"width":            40,
+		"insurance_value":  0,
+		"coupon":           nil,
+		"items": []map[string]interface{}{
+			{
+				"name":     "TEST1",
+				"quantity": 1,
+				"height":   200,
+				"weight":   1000,
+				"length":   200,
+				"width":    200,
+			},
+		},
+	}
+	reqBody, _ := json.Marshal(payload)
+
+	req, err := http.NewRequest("POST", "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee", bytes.NewBuffer(reqBody))
+	if err != nil {
+		fmt.Println("Lỗi khi tạo yêu cầu:", err)
+		return -1
+	}
+	req.Header.Add("token", token)
+	req.Header.Add("ShopId", shopId)
+	// Thực hiện yêu cầu HTTP
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Lỗi khi gọi API:", err)
+		return -1
+	}
+	defer resp.Body.Close()
+	// Đảm bảo response có status code 200 OK
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Lỗi: Không thể lấy dữ liệu. Mã trạng thái:", resp.StatusCode)
+		return -1
+	}
+
+	// Decode JSON response vào một map[string]interface{}
+	var shipment models.ShipmentResponse
+	if err := json.NewDecoder(resp.Body).Decode(&shipment); err != nil {
+		fmt.Println("Lỗi khi decode JSON:", err)
+		return -1
+	}
+
+	// In ra dữ liệu hoặc lưu vào một map
+	return shipment.Data[0].Total
+}

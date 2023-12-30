@@ -21,6 +21,7 @@ type CartItemResponse struct {
 	Province string     `json:"province,omitempty" bson:"-"`
 	District string     `json:"district,omitempty" bson:"-"`
 	Ward     string     `json:"ward,omitempty" bson:"-"`
+	ShipFee  int        `json:"shipFee,omitempty" bson:"-"`
 
 	TotalPrice int `json:"total_price,omitempty"`
 }
@@ -47,5 +48,11 @@ type OrderResponse struct {
 	Status  int     `json:"status"`
 	Message string  `json:"message"`
 	Data    []Order `json:"data"`
-	Total   int       `json:"total,omitempty"`
+	Total   int     `json:"total,omitempty"`
+}
+
+type ShipmentResponse struct {
+	Code    int        `json:"code,omitempty"`
+	Message string     `json:"message,omitempty"`
+	Data    []ShipMent `json:"data,omitempty"`
 }

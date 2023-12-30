@@ -17,8 +17,10 @@ type Order struct {
 	Price    int    `json:"price,omitempty" bson:"price,omitempty"`
 	Status   string `json:"status,omitempty" bson:"status,omitempty"`
 	// PaymentMethod string `json:"payment"`
-	Items   []CartItem `json:"Items,omitempty" bson:"items,omitempty"`
-	Address string     `json:"address,omitempty" bson:"address,omitempty"`
+	Items        []CartItem `json:"Items,omitempty" bson:"items,omitempty"`
+	Address      string     `json:"address,omitempty" bson:"address,omitempty"`
+	ShipFee      int        `json:"shipFee,omitempty" bson:"ship_fee,omitemty"`
+	DileveryDate time.Time  `json:"deliveryDate,omitempty" bson:"delivery_date,omitempty"`
 
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`

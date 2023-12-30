@@ -70,3 +70,5 @@ func parsePointerToString(ptr *string) string {
 	}
 	return *ptr
 }
+
+

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/client"
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/email"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
@@ -71,17 +72,20 @@ func Checkout() gin.HandlerFunc {
 				return
 			}
 		}
+		time := time.Now().Add(7 * 24 * time.Hour)
+
 		orderID := utils.GenerateCode("ORD", 6)
 
 		newOrder := models.Order{
-			CartID:   checkout.CartID,
-			UserID:   utils.InterfaceToString(userID),
-			OrderID:  orderID,
-			Items:    checkout.CartItems,
-			Price:    checkout.TotalPrice,
-			Status:   "SUCCESS",
-			Address:  checkout.Address,
-			Quantity: checkout.Quantity,
+			CartID:       checkout.CartID,
+			UserID:       utils.InterfaceToString(userID),
+			OrderID:      orderID,
+			Items:        checkout.CartItems,
+			Price:        checkout.TotalPrice + checkout.ShipFee,
+			DileveryDate: time,
+			Status:       "SUCCESS",
+			Address:      checkout.Address,
+			Quantity:     checkout.Quantity,
 		}
 
 		_, anyerr := OrderCollection.InsertOne(ctx, newOrder)
@@ -237,6 +241,71 @@ func GetAllOrder() gin.HandlerFunc {
 			Message: "Get List product success",
 			Data:    orders,
 			Total:   int(totalCount),
+		})
+
+	}
+}
+
+func GetRawOrder() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		userID, ok := c.Get("uid")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+			return
+		}
+		var cart models.Cart
+		var items []models.CartItem
+		var user models.User
+		err := CartCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&cart)
+
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "cart not found !"})
+			return
+		}
+
+		userErr := UserCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+		if userErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "user not found !"})
+			return
+		}
+
+		filter := bson.D{{"cart_id", cart.CartID}}
+		rs, findErr := CartItemCollection.Find(ctx, filter)
+		if findErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "Cannot get userID"})
+			return
+		}
+		total := 0
+		totalPrice := 0
+		for rs.Next(ctx) {
+			var singleCartItem models.CartItem
+			if err := rs.Decode(&singleCartItem); err != nil {
+				c.JSON(http.StatusOK, models.CartItemResponse{
+					Status:  200,
+					Message: "Cart is empty",
+					Data:    []models.CartItem{},
+				})
+				return
+			}
+			total = total + singleCartItem.ItemQuantity
+			totalPrice = totalPrice + singleCartItem.Price
+
+			items = append(items, singleCartItem)
+		}
+		fee := client.CheckShipingFee("", user.District, user.Ward)
+
+		c.JSON(http.StatusOK, models.CartItemResponse{
+			Status:     200,
+			Message:    "Get cart successfully",
+			Total:      total,
+			TotalPrice: totalPrice,
+			Data:       items,
+			ShipFee:    fee,
+			Province:   user.Province,
+			District:   user.District,
+			Ward:       user.Ward,
 		})
 
 	}
