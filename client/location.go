@@ -57,21 +57,11 @@ func Init() {
 }
 
 func CheckShipingFee(province, district, ward string) int {
-	token := "5c4242e4-9bf5-11ee-96dc-de6f804954c9"
-	shopId := "4771536"
-	// Tạo HTTP client
-	client := &http.Client{}
+	url := "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee"
 
-	// params := url.Values{}
-	// params.Set("paramKey", "paramValue")
-
-	// // Thêm tham số vào URL
-	// reqURL := "https://online-gateway.ghn.vn/shiip/public-api/master-data/province"
-	// reqURL += "?" + params.Encode()
 	districtInt, _ := utils.ParseStringToIn64(district)
-
 	payload := map[string]interface{}{
-		"service_type_id":  5,
+		"service_type_id":  2,
 		"from_district_id": 1442,
 		"to_district_id":   districtInt,
 		"to_ward_code":     ward,
@@ -92,22 +82,27 @@ func CheckShipingFee(province, district, ward string) int {
 			},
 		},
 	}
+
 	reqBody, _ := json.Marshal(payload)
 
-	req, err := http.NewRequest("POST", "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee", bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
 	if err != nil {
-		fmt.Println("Lỗi khi tạo yêu cầu:", err)
+		fmt.Println("Error creating request:", err)
 		return -1
 	}
-	req.Header.Add("token", token)
-	req.Header.Add("ShopId", shopId)
-	// Thực hiện yêu cầu HTTP
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Token", "5c4242e4-9bf5-11ee-96dc-de6f804954c9")
+	req.Header.Set("ShopId", "4771536")
+
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Lỗi khi gọi API:", err)
+		fmt.Println("Error making request:", err)
 		return -1
 	}
 	defer resp.Body.Close()
+
 	// Đảm bảo response có status code 200 OK
 	if resp.StatusCode != http.StatusOK {
 		fmt.Println("Lỗi: Không thể lấy dữ liệu. Mã trạng thái:", resp.StatusCode)
@@ -122,5 +117,5 @@ func CheckShipingFee(province, district, ward string) int {
 	}
 
 	// In ra dữ liệu hoặc lưu vào một map
-	return shipment.Data[0].Total
+	return shipment.Data.Total
 }

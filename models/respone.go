@@ -52,7 +52,7 @@ type OrderResponse struct {
 }
 
 type ShipmentResponse struct {
-	Code    int        `json:"code,omitempty"`
-	Message string     `json:"message,omitempty"`
-	Data    []ShipMent `json:"data,omitempty"`
+	Code    int      `json:"code,omitempty"`
+	Message string   `json:"message,omitempty"`
+	Data    ShipMent `json:"data,omitempty"`
 }
