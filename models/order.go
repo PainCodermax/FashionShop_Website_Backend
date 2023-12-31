@@ -22,6 +22,6 @@ type Order struct {
 	ShipFee      int        `json:"shipFee,omitempty" bson:"ship_fee,omitemty"`
 	DileveryDate time.Time  `json:"deliveryDate,omitempty" bson:"delivery_date,omitempty"`
 
-	Created_At time.Time `json:"created_at"`
-	Updated_At time.Time `json:"updtaed_at"`
+	Created_At time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	Updated_At time.Time `json:"updtaed_at,omitempty" bson:"updtaed_at,omitempty"`
 }

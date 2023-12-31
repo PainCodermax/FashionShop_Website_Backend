@@ -72,7 +72,7 @@ func Checkout() gin.HandlerFunc {
 				return
 			}
 		}
-		time := time.Now().Add(7 * 24 * time.Hour)
+		t := time.Now().Add(7 * 24 * time.Hour)
 
 		orderID := utils.GenerateCode("ORD", 6)
 
@@ -82,10 +82,11 @@ func Checkout() gin.HandlerFunc {
 			OrderID:      orderID,
 			Items:        checkout.CartItems,
 			Price:        checkout.TotalPrice + checkout.ShipFee,
-			DileveryDate: time,
+			DileveryDate: t,
 			Status:       "SUCCESS",
 			Address:      checkout.Address,
 			Quantity:     checkout.Quantity,
+			Created_At:   time.Now(),
 		}
 
 		_, anyerr := OrderCollection.InsertOne(ctx, newOrder)
