@@ -311,3 +311,31 @@ func GetRawOrder() gin.HandlerFunc {
 
 	}
 }
+
+func GetOneOrder() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		if value, ok := c.Get("isAdmin"); ok {
+			if value != true {
+				c.JSON(http.StatusNotFound, gin.H{"error": "no permision"})
+				return
+			}
+		}
+		var order models.Order
+		orderID := c.Param("orderID")
+		if orderID == "" {
+			c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
+			return
+		}
+
+		filter := bson.D{{"order_id", orderID}}
+		err := OrderCollection.FindOne(ctx, filter).Decode(&order)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, order)
+		
+	}
+}

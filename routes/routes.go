@@ -41,6 +41,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.PUT("/users/orders/cancel/:orderId", controllers.CancelOrder())
 	incomingRoutes.GET("/users/orders/get-single", controllers.GetOrder())
 	incomingRoutes.GET("/users/orders/get-raw-order", controllers.GetRawOrder())
+	incomingRoutes.PUT("/users/order/update", controllers.GetOneOrder() )
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {
@@ -59,4 +60,5 @@ func AdminRouter(incomingRoutes *gin.Engine) {
 
 	//order
 	incomingRoutes.GET("/admin/orders/get-all-order", controllers.GetAllOrder())
+	incomingRoutes.GET("/admin/order/:orderID", controllers.GetOneOrder())
 }
