@@ -3,20 +3,24 @@ package controllers
 import (
 	"context"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/PainCodermax/FashionShop_Website_Backend/client"
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/email"
+	"github.com/PainCodermax/FashionShop_Website_Backend/enum"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var OrderCollection *mongo.Collection = database.ProductData(database.Client, "order")
+var DeliveryCollection *mongo.Collection = database.ProductData(database.Client, "delivery")
 
 func Checkout() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -153,9 +157,10 @@ func CancelOrder() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get email"})
 			return
 		}
+
 		update := bson.M{
 			"$set": models.Order{
-				Status: "CANCELED",
+				Status: string(enum.Cancelled),
 			},
 		}
 
@@ -336,6 +341,92 @@ func GetOneOrder() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, order)
-		
+	}
+}
+
+func SubmitOrder() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		if value, ok := c.Get("isAdmin"); ok {
+			if value != true {
+				c.JSON(http.StatusNotFound, gin.H{"error": "no permission"})
+				return
+			}
+		}
+
+		orderID := c.Param("orderID")
+		var order models.Order
+
+		filter := bson.D{{"order_id", orderID}}
+		err := OrderCollection.FindOne(ctx, filter).Decode(&order)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var wg sync.WaitGroup // Khởi tạo WaitGroup
+
+		// Thêm số lượng goroutine cần đợi vào WaitGroup
+		wg.Add(4)
+
+		// Thực hiện cập nhật trạng thái đơn hàng trong một goroutine riêng
+		go func() {
+			defer wg.Done() // Đánh dấu hoàn thành goroutine khi kết thúc
+			update := bson.M{
+				"$set": models.Order{
+					Status: string(enum.Processing),
+				},
+			}
+			_, err := OrderCollection.UpdateOne(ctx, bson.D{{"order_id", orderID}}, update)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+		}()
+
+		// Lấy thông tin user trong một goroutine riêng
+		go func() {
+			defer wg.Done() // Đánh dấu hoàn thành goroutine khi kết thúc
+			var user models.User
+			err := UserCollection.FindOne(ctx, bson.D{{"user_id", order.UserID}}).Decode(&user)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			// Gửi email trong một goroutine riêng
+			go func() {
+				defer wg.Done() // Đánh dấu hoàn thành goroutine khi kết thúc
+				mailErr := email.CancelOrder(utils.ParsePoitnerToString(user.Email), orderID)
+				if mailErr != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+			}()
+		}()
+
+		// Thêm dữ liệu vào collection Delivery trong một goroutine riêng
+		go func() {
+			defer wg.Done() // Đánh dấu hoàn thành goroutine khi kết thúc
+			delivery := models.Delivery{
+				ID:             primitive.NewObjectID(),
+				DeliveryID:     utils.GenerateCode("DElI", 5),
+				OrderID:        &orderID,
+				DeliveryDate:   time.Now().Add(7 * 24 * time.Hour), // Thêm 7 ngày vào ngày hiện tại
+				Created_At:     time.Now(),
+				DeliveryStatus: enum.Shipping,
+			}
+
+			_, err := DeliveryCollection.InsertOne(ctx, delivery)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+		}()
+
+		// Chờ cho tất cả các goroutine hoàn thành trước khi trả về phản hồi cho client
+		wg.Wait()
+		c.JSON(http.StatusOK, gin.H{"message": "order submission in progress"})
 	}
 }

@@ -45,6 +45,7 @@ func ProductData(client *mongo.Client, CollectionName string) *mongo.Collection 
 	return productcollection
 }
 
+
 func DB(client *mongo.Client, CollectionName string) *mongo.Collection {
 	var collection *mongo.Collection = client.Database("Fashion_Shop").Collection(CollectionName)
 	return collection

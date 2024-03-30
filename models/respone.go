@@ -56,3 +56,9 @@ type ShipmentResponse struct {
 	Message string   `json:"message,omitempty"`
 	Data    ShipMent `json:"data,omitempty"`
 }
+
+type DeliveryResponse struct {
+	Status  int      `json:"status"`
+	Message string   `json:"message"`
+	Data    Delivery `json:"data"`
+}

@@ -5,9 +5,10 @@ import (
 )
 
 type Application struct {
-	prodCollection     *mongo.Collection
-	userCollection     *mongo.Collection
-	categoryCollection *mongo.Collection
+	prodCollection        *mongo.Collection
+	userCollection        *mongo.Collection
+	categoryCollection    *mongo.Collection
+	addressUserCollection *mongo.Collection
 }
 
 func NewApplication(prodCollection, userCollection, categoryCollection *mongo.Collection) *Application {
