@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -18,3 +19,5 @@ func NewApplication(prodCollection, userCollection, categoryCollection *mongo.Co
 		categoryCollection: CategoryCollection,
 	}
 }
+
+var RatingCollection *mongo.Collection = database.ProductData(database.Client, "rating")

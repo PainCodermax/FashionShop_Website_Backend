@@ -62,3 +62,10 @@ type DeliveryResponse struct {
 	Message string   `json:"message"`
 	Data    Delivery `json:"data"`
 }
+
+type RatingResponse struct {
+	Status  int       `json:"status"`
+	Message string    `json:"message"`
+	Data    []Rating `json:"data"`
+	Total   int       `json:"total,omitempty"`
+}

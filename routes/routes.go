@@ -47,6 +47,10 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	//address
 	// incomingRoutes.POST("/users/address", controllers.AddAddress())
 
+	//rating
+	incomingRoutes.POST("/users/rating", controllers.CreateRating())
+	incomingRoutes.GET("/users/rating/:productId", controllers.GetRating())
+
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {
