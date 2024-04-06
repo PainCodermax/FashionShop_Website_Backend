@@ -365,12 +365,9 @@ func SubmitOrder() gin.HandlerFunc {
 			return
 		}
 
-		var wg sync.WaitGroup // Khởi tạo WaitGroup
-
-		// Thêm số lượng goroutine cần đợi vào WaitGroup
+		var wg sync.WaitGroup
 		wg.Add(4)
 
-		// Thực hiện cập nhật trạng thái đơn hàng trong một goroutine riêng
 		go func() {
 			defer wg.Done() // Đánh dấu hoàn thành goroutine khi kết thúc
 			update := bson.M{
@@ -395,7 +392,6 @@ func SubmitOrder() gin.HandlerFunc {
 				return
 			}
 
-			// Gửi email trong một goroutine riêng
 			go func() {
 				defer wg.Done() // Đánh dấu hoàn thành goroutine khi kết thúc
 				mailErr := email.CancelOrder(utils.ParsePoitnerToString(user.Email), orderID)
@@ -406,15 +402,15 @@ func SubmitOrder() gin.HandlerFunc {
 			}()
 		}()
 
-		// Thêm dữ liệu vào collection Delivery trong một goroutine riêng
 		go func() {
-			defer wg.Done() // Đánh dấu hoàn thành goroutine khi kết thúc
+			defer wg.Done()
 			delivery := models.Delivery{
 				ID:             primitive.NewObjectID(),
 				DeliveryID:     utils.GenerateCode("DElI", 5),
 				OrderID:        &orderID,
 				DeliveryDate:   time.Now().Add(7 * 24 * time.Hour), // Thêm 7 ngày vào ngày hiện tại
 				Created_At:     time.Now(),
+				Address:        order.Address,
 				DeliveryStatus: enum.Shipping,
 			}
 
@@ -425,7 +421,6 @@ func SubmitOrder() gin.HandlerFunc {
 			}
 		}()
 
-		// Chờ cho tất cả các goroutine hoàn thành trước khi trả về phản hồi cho client
 		wg.Wait()
 		c.JSON(http.StatusOK, gin.H{"message": "order submission in progress"})
 	}

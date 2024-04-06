@@ -32,7 +32,7 @@ func GetDelivery() gin.HandlerFunc {
 			}
 
 		} else {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Cannot add category"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "Cannot get delievry info"})
 			return
 		}
 	}

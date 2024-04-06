@@ -13,6 +13,7 @@ type Delivery struct {
 	OrderID        *string            `json:"orderID,omitempty" bson:"order_id,omitempty"`
 	DeliveryDate   time.Time          `json:"deliveryDate,omitempty" bson:"delivery_date,omitempty"`
 	DeliveryStatus enum.OrderStatus   `json:"deliveryStatus,omitempty" bson:"delivery_status,omitempty"`
+	Address        string             `json:"address,omitempty" bson:"address,omitempty"`
 
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`
