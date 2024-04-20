@@ -42,14 +42,14 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/users/orders/get-single", controllers.GetOrder())
 	incomingRoutes.GET("/users/orders/get-raw-order", controllers.GetRawOrder())
 	incomingRoutes.PUT("/users/order/update", controllers.GetOneOrder())
-	incomingRoutes.PATCH("/")
-
 	//address
 	// incomingRoutes.POST("/users/address", controllers.AddAddress())
 
 	//rating
 	incomingRoutes.POST("/users/rating", controllers.CreateRating())
 	incomingRoutes.GET("/users/rating/:productId", controllers.GetRating())
+
+	incomingRoutes.GET("/payment/:orderId", controllers.PaymentByVnPay())
 
 }
 

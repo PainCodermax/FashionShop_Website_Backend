@@ -31,4 +31,5 @@ type CartItem struct {
 	Price       int      `json:"price,omitempty" bson:"price,omitempty"`
 	ListImage   []string `json:"listImage,omitempty" bson:"list_image,omitempty"`
 	Quantity    int      `json:"quantity,omitempty" bson:"quantity,omitempty"`
+	IsRate      bool     `json:"IsRate,omitempty" bson:"_"`
 }

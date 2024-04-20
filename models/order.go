@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/enum"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -16,11 +17,13 @@ type Order struct {
 	Quantity int    `json:"quantity,omitempty" bson:"quantity,omitempty"`
 	Price    int    `json:"price,omitempty" bson:"price,omitempty"`
 	Status   string `json:"status,omitempty" bson:"status,omitempty"`
-	// PaymentMethod string `json:"payment"`
-	Items        []CartItem `json:"Items,omitempty" bson:"items,omitempty"`
-	Address      string     `json:"address,omitempty" bson:"address,omitempty"`
-	ShipFee      int        `json:"shipFee,omitempty" bson:"ship_fee,omitemty"`
-	DileveryDate time.Time  `json:"deliveryDate,omitempty" bson:"delivery_date,omitempty"`
+
+	Items         []CartItem         `json:"Items,omitempty" bson:"items,omitempty"`
+	Address       string             `json:"address,omitempty" bson:"address,omitempty"`
+	ShipFee       int                `json:"shipFee,omitempty" bson:"ship_fee,omitemty"`
+	DileveryDate  time.Time          `json:"deliveryDate,omitempty" bson:"delivery_date,omitempty"`
+	PaymentMethod enum.PaymentMethod `json:"payment,omitempty" bson:"payment_omitempty"`
+	IsPaid        bool               `json:"isPaid,omitempty" bson:"is_paid,omitempty"`
 
 	Created_At time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
 	Updated_At time.Time `json:"updtaed_at,omitempty" bson:"updtaed_at,omitempty"`

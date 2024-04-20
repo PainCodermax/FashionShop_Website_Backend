@@ -187,6 +187,13 @@ func GetOrder() gin.HandlerFunc {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
 		orderID := c.Query("orderId")
+
+		userID, ok := c.Get("uid")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+			return
+		}
+
 		var order models.Order
 		err := OrderCollection.FindOne(ctx, bson.D{{"order_id", orderID}}).Decode(&order)
 		if err != nil {
@@ -195,6 +202,18 @@ func GetOrder() gin.HandlerFunc {
 			})
 			return
 		}
+
+		for _, item := range order.Items {
+			var rating models.Rating
+			err := RatingCollection.FindOne(ctx, bson.M{
+				"userId":     userID,
+				"product_id": item.ProductID,
+			}).Decode(&rating)
+			if err != nil {
+				item.IsRate = true
+			}
+		}
+
 		c.JSON(http.StatusOK, models.OrderResponse{
 			Status:  200,
 			Message: "Get List product success",
@@ -422,6 +441,33 @@ func SubmitOrder() gin.HandlerFunc {
 		}()
 
 		wg.Wait()
+		c.JSON(http.StatusOK, gin.H{"message": "order submission in progress"})
+	}
+}
+
+func PaymentByVnPay() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		orderID := c.Param("orderId")
+		var order models.Order
+
+		filter := bson.D{{"order_id", orderID}}
+		err := OrderCollection.FindOne(ctx, filter).Decode(&order)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if order.PaymentMethod != enum.VNPAY {
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{
+					"error": "Order is COD",
+				},
+			)
+		}
+
 		c.JSON(http.StatusOK, gin.H{"message": "order submission in progress"})
 	}
 }

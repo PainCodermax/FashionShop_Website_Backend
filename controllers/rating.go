@@ -38,6 +38,7 @@ func CreateRating() gin.HandlerFunc {
 			})
 			return
 		}
+		rating.User_ID = utils.InterfaceToString(userID)
 		rating.User = founduser
 
 		if rating.OrderID != nil {
