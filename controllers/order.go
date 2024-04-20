@@ -202,17 +202,26 @@ func GetOrder() gin.HandlerFunc {
 			})
 			return
 		}
-
+		var rawItems []models.CartItem
 		for _, item := range order.Items {
-			var rating models.Rating
+			var rating *models.Rating
+
 			err := RatingCollection.FindOne(ctx, bson.M{
-				"userId":     userID,
+				"user_id":    userID,
 				"product_id": item.ProductID,
 			}).Decode(&rating)
 			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"message": "not found rating",
+				})
+			}
+			if rating != nil {
 				item.IsRate = true
 			}
+
+			rawItems = append(rawItems, item)
 		}
+		order.Items = rawItems
 
 		c.JSON(http.StatusOK, models.OrderResponse{
 			Status:  200,
