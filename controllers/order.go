@@ -211,13 +211,10 @@ func GetOrder() gin.HandlerFunc {
 				"product_id": item.ProductID,
 			}).Decode(&rating)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"message": "not found rating",
-				})
+				rawItems = append(rawItems, item)
+				continue
 			}
-			if rating != nil {
-				item.IsRate = true
-			}
+			item.IsRate = true
 
 			rawItems = append(rawItems, item)
 		}
