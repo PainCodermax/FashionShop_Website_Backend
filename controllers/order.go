@@ -633,7 +633,11 @@ func PaymentByVnPay2() gin.HandlerFunc {
 
 		vnpURL += "?" + vnpParams.Encode()
 
-		c.Redirect(http.StatusTemporaryRedirect, vnpURL)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "get vnpay payment success",
+			"url":     vnpURL,
+		})
+
 	}
 }
 
