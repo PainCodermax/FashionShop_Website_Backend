@@ -91,16 +91,17 @@ func Checkout(orderUpdateChannel chan<- string) gin.HandlerFunc {
 		orderID := utils.GenerateCode("ORD", 6)
 
 		newOrder := models.Order{
-			CartID:       checkout.CartID,
-			UserID:       utils.InterfaceToString(userID),
-			OrderID:      orderID,
-			Items:        checkout.CartItems,
-			Price:        checkout.TotalPrice + checkout.ShipFee,
-			DileveryDate: t,
-			Status:       enum.Pending,
-			Address:      checkout.Address,
-			Quantity:     checkout.Quantity,
-			Created_At:   time.Now(),
+			CartID:        checkout.CartID,
+			UserID:        utils.InterfaceToString(userID),
+			OrderID:       orderID,
+			Items:         checkout.CartItems,
+			Price:         checkout.TotalPrice + checkout.ShipFee,
+			DileveryDate:  t,
+			Status:        enum.Pending,
+			Address:       checkout.Address,
+			Quantity:      checkout.Quantity,
+			Created_At:    time.Now(),
+			PaymentMethod: checkout.PaymentMethod,
 		}
 
 		_, anyerr := OrderCollection.InsertOne(ctx, newOrder)
