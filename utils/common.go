@@ -71,4 +71,14 @@ func parsePointerToString(ptr *string) string {
 	return *ptr
 }
 
+func ParseInt64ToString(i int64) string {
+	return strconv.FormatInt(i, 10)
+}
 
+func ParseStringToInt(s string) (int, error) {
+	return strconv.Atoi(s)
+}
+
+func ParseIntToString(i int) string {
+    return strconv.Itoa(i)
+}

@@ -616,7 +616,7 @@ func PaymentByVnPay2() gin.HandlerFunc {
 		vnpParams.Set("vnp_TxnRef", payment.OrderId)
 		vnpParams.Set("vnp_OrderInfo", "Thanh toan cho ma GD:"+payment.OrderId)
 		vnpParams.Set("vnp_OrderType", "other")
-		vnpParams.Set("vnp_Amount", payment.Amount)
+		vnpParams.Set("vnp_Amount", utils.ParseIntToString(order.Price*100))
 		vnpParams.Set("vnp_ReturnUrl", returnURL)
 		vnpParams.Set("vnp_IpAddr", ipAddr)
 		vnpParams.Set("vnp_CreateDate", createDate)
