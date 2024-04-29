@@ -4,10 +4,10 @@ type OrderStatus string
 
 const (
 	Pending    OrderStatus = "WAITING"
+	Submitted  OrderStatus = "SUBMITED"
 	Processing OrderStatus = "PROCESSING"
 	Shipping   OrderStatus = "SHIPPING"
-	Delivered  OrderStatus = "Delivered"
+	Delivery   OrderStatus = "DELIVERY"
 	Cancelled  OrderStatus = "CANCELLED"
+	Received  OrderStatus = "RECEIVED"
 )
-
-

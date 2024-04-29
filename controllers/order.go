@@ -32,7 +32,7 @@ import (
 
 var DeliveryCollection *mongo.Collection = database.ProductData(database.Client, "delivery")
 
-func Checkout() gin.HandlerFunc {
+func Checkout(orderUpdateChannel chan<- string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
@@ -97,7 +97,7 @@ func Checkout() gin.HandlerFunc {
 			Items:        checkout.CartItems,
 			Price:        checkout.TotalPrice + checkout.ShipFee,
 			DileveryDate: t,
-			Status:       "SUCCESS",
+			Status:       enum.Pending,
 			Address:      checkout.Address,
 			Quantity:     checkout.Quantity,
 			Created_At:   time.Now(),
@@ -108,12 +108,21 @@ func Checkout() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Not Created"})
 			return
 		}
+
+		// orderUpdateChannel <- orderID
+		time.AfterFunc(10*time.Second, func() {
+			UpdateOrder(orderID)
+		})
+
 		mailErr := email.ConfirmOrder(utils.InterfaceToString(emailUser), orderID)
 		if mailErr != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "email not found"})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Checkout successfully"})
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Checkout successfully",
+			"orderId": orderID,
+		})
 	}
 }
 
@@ -170,7 +179,7 @@ func CancelOrder() gin.HandlerFunc {
 
 		update := bson.M{
 			"$set": models.Order{
-				Status: string(enum.Cancelled),
+				Status: enum.Cancelled,
 			},
 		}
 
@@ -407,7 +416,7 @@ func SubmitOrder() gin.HandlerFunc {
 			defer wg.Done() // Đánh dấu hoàn thành goroutine khi kết thúc
 			update := bson.M{
 				"$set": models.Order{
-					Status: string(enum.Processing),
+					Status: enum.Submitted,
 				},
 			}
 			_, err := OrderCollection.UpdateOne(ctx, bson.D{{"order_id", orderID}}, update)
@@ -688,15 +697,46 @@ func sortParams(params url.Values) [][2]string {
 	return sortedParams
 }
 
-func UpdateOrder(ctx context.Context, orderId string) {
+func UpdateOrder(orderId string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
 	update := bson.M{
 		"$set": models.Order{
-			IsPaid: true, // Simplified the bool expression
+			Status: enum.Submitted, // Simplified the bool expression
 		},
 	}
-	_, uErr := OrderCollection.UpdateOne(ctx, bson.D{{"order_id", orderId}}, update)
-	if uErr != nil {
-		log.Println("UpdateOne error:", uErr)
+
+	var order models.Order
+	filter := bson.D{{"order_id", orderId}}
+	e := OrderCollection.FindOne(ctx, filter).Decode(&order)
+	if e != nil {
+		log.Println("UpdateOne error:", e)
 		return
 	}
+
+	if order.Status == enum.Pending {
+		if order.PaymentMethod == enum.VNPAY && !order.IsPaid {
+			return
+		}
+		_, uErr := OrderCollection.UpdateOne(ctx, bson.D{{"order_id", orderId}}, update)
+		if uErr != nil {
+			log.Println("UpdateOne error:", uErr)
+			return
+		}
+	}
+}
+
+func UpdateOrderStatus(order models.Order) {
+	// ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	// defer cancel()
+
+	// var status enum.OrderStatus = enum.Received
+
+	// if order.Status == enum.Submitted {
+	// 	status = enum.Processing
+	// }
+
+	// if order.Status == enum.Processing {
+	// 	status = enum.
+	// }
 }

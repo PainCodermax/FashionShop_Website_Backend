@@ -1,7 +1,10 @@
 package routes
 
 import (
+	"context"
+
 	"github.com/PainCodermax/FashionShop_Website_Backend/controllers"
+	"github.com/PainCodermax/FashionShop_Website_Backend/worker"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +20,14 @@ func LoginRoutes(incomingRoutes *gin.Engine) {
 }
 
 func UserRoutes(incomingRoutes *gin.Engine) {
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	workerChannel := make(chan string)
+
+	WorkerChannel := make(chan string)
+	go worker.Worker(ctx, WorkerChannel)
+
 	//users
 	incomingRoutes.POST("/users/get-token", controllers.GetNewToken())
 	incomingRoutes.GET("/users/get-user", controllers.GetUser())
@@ -38,7 +49,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.DELETE("/users/cart/delete/:cartItemID", controllers.DeleteCartItem())
 
 	//order
-	incomingRoutes.POST("/users/checkout", controllers.Checkout())
+	incomingRoutes.POST("/users/checkout", controllers.Checkout(workerChannel))
 	incomingRoutes.GET("/users/orders", controllers.GetListOrder())
 	incomingRoutes.PUT("/users/orders/cancel/:orderId", controllers.CancelOrder())
 	incomingRoutes.GET("/users/orders/get-single", controllers.GetOrder())

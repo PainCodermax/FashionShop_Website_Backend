@@ -16,7 +16,7 @@ type Order struct {
 
 	Quantity int    `json:"quantity,omitempty" bson:"quantity,omitempty"`
 	Price    int    `json:"price,omitempty" bson:"price,omitempty"`
-	Status   string `json:"status,omitempty" bson:"status,omitempty"`
+	Status   enum.OrderStatus `json:"status,omitempty" bson:"status,omitempty"`
 
 	Items         []CartItem         `json:"Items,omitempty" bson:"items,omitempty"`
 	Address       string             `json:"address,omitempty" bson:"address,omitempty"`
