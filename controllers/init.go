@@ -10,6 +10,7 @@ type Application struct {
 	userCollection        *mongo.Collection
 	categoryCollection    *mongo.Collection
 	addressUserCollection *mongo.Collection
+	
 }
 
 func NewApplication(prodCollection, userCollection, categoryCollection *mongo.Collection) *Application {

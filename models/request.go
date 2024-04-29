@@ -8,3 +8,8 @@ type RequestOrder struct {
 	Quantity   int        `json:"quantity,omitempty"`
 	ShipFee    int        `json:"shipFee,omitempty" bson:"ship_fee,omitemty"`
 }
+
+type RequestPayment struct {
+	OrderId string `json:"orderId,omitempty"`
+	Amount  string `json:"amount,omitempty"`
+}

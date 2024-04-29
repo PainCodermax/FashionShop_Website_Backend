@@ -21,21 +21,6 @@ func Credentials() (*cloudinary.Cloudinary, context.Context) {
 }
 
 func UploadImage(cld *cloudinary.Cloudinary, data string, idx int, ctx context.Context) string {
-
-	// imageFilePath := "image.jpeg"
-	// imageFile, err := ioutil.ReadFile(imageFilePath)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// // Encode the image data to Base64
-	// base64Image := base64.StdEncoding.EncodeToString(imageFile)
-
-	// // Create a Base64 URL
-	// base64URL := "data:image/jpeg;base64," + url.PathEscape(base64Image)
-
-	// Upload the image.
-	// Set the asset's public ID and allow overwriting the asset with new versions
 	now := time.Now().UTC().String()
 	resp, err := cld.Upload.Upload(ctx, data, uploader.UploadParams{
 		PublicID:       fmt.Sprintf("product-%s-%d", now, idx),

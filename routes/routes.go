@@ -7,11 +7,13 @@ import (
 )
 
 func LoginRoutes(incomingRoutes *gin.Engine) {
+	incomingRoutes.GET("users/payment/vnpay/callback", controllers.VnpayReturnHandler())
 	incomingRoutes.POST("/users/signup", controllers.SignUp())
 	incomingRoutes.POST("/users/login", controllers.Login())
 	incomingRoutes.POST("/users/verify", controllers.VerifyUser())
 	incomingRoutes.POST("/users/forget-password", controllers.ForGotPassword())
 	incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
+
 }
 
 func UserRoutes(incomingRoutes *gin.Engine) {
@@ -49,8 +51,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/rating", controllers.CreateRating())
 	incomingRoutes.GET("/users/rating/:productId", controllers.GetRating())
 
-	incomingRoutes.GET("/payment/:orderId", controllers.PaymentByVnPay())
-
+	incomingRoutes.POST("users/payment/vnpay", controllers.PaymentByVnPay2())
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {

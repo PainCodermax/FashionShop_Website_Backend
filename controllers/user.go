@@ -23,6 +23,7 @@ import (
 
 var Validate = validator.New()
 var UserCollection *mongo.Collection = database.UserData(database.Client, "user")
+var OrderCollection *mongo.Collection = database.ProductData(database.Client, "order")
 
 func HashPassword(password string) string {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)

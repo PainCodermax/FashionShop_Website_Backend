@@ -22,7 +22,7 @@ type Order struct {
 	Address       string             `json:"address,omitempty" bson:"address,omitempty"`
 	ShipFee       int                `json:"shipFee,omitempty" bson:"ship_fee,omitemty"`
 	DileveryDate  time.Time          `json:"deliveryDate,omitempty" bson:"delivery_date,omitempty"`
-	PaymentMethod enum.PaymentMethod `json:"payment,omitempty" bson:"payment_omitempty"`
+	PaymentMethod enum.PaymentMethod `json:"paymentMethod,omitempty" bson:"payment_method,omitempty"`
 	IsPaid        bool               `json:"isPaid,omitempty" bson:"is_paid,omitempty"`
 
 	Created_At time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`

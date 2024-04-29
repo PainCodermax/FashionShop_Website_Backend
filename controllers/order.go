@@ -2,7 +2,18 @@ package controllers
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/md5"
+	"crypto/sha512"
+	"encoding/hex"
+	"fmt"
+	"log"
 	"net/http"
+	"net/url"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -19,7 +30,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var OrderCollection *mongo.Collection = database.ProductData(database.Client, "order")
 var DeliveryCollection *mongo.Collection = database.ProductData(database.Client, "delivery")
 
 func Checkout() gin.HandlerFunc {
@@ -455,7 +465,8 @@ func PaymentByVnPay() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
-		orderID := c.Param("orderId")
+		orderID := c.PostForm("orderId")
+		amount, _ := strconv.Atoi(c.PostForm("amount"))
 		var order models.Order
 
 		filter := bson.D{{"order_id", orderID}}
@@ -473,7 +484,219 @@ func PaymentByVnPay() gin.HandlerFunc {
 				},
 			)
 		}
+		// Thông tin từ VNPay
+		vnpUrl := os.Getenv("VNP_URL")
 
-		c.JSON(http.StatusOK, gin.H{"message": "order submission in progress"})
+		// Thông tin merchant từ tài khoản của bạn
+		merchantId := os.Getenv("MERCHANT_ID")
+
+		// Tạo request
+		data := url.Values{}
+		data.Set("vnp_Version", "2.1.0")
+		data.Set("vnp_Command", "pay")
+		data.Set("vnp_TmnCode", merchantId)
+		data.Set("vnp_Locale", "vn")
+		data.Set("vnp_CurrCode", "VND")
+		data.Set("vnp_TxnRef", orderID)
+		data.Set("vnp_OrderInfo", "Thanh toan don hang")
+		data.Set("vnp_OrderType", "billpayment")
+		data.Set("vnp_Amount", fmt.Sprintf("%d", amount*100)) // Chuyển đổi sang đơn vị xu
+		data.Set("vnp_ReturnUrl", "http://localhost:3000/users/payment/vnpay/callback")
+		data.Set("vnp_IpAddr", "127.0.0.1")
+
+		// Tính mã hash
+		secureHash := "SERCURE_HASH"
+		data.Set("vnp_SecureHashType", "MD5")
+		query := data.Encode() + "&vnp_SecureHash=" + generateMD5Hash(data.Encode()+secureHash)
+
+		// Trả về URL thanh toán VNPay
+		c.JSON(http.StatusOK, gin.H{
+			"payment_url": vnpUrl + "?" + query,
+		})
+	}
+}
+
+func generateMD5Hash(data string) string {
+	hash := md5.New()
+	hash.Write([]byte(data))
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func PaymentByVnPayCallBack() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var _, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		orderId := c.PostForm("vnp_TxnRef")
+		amount, _ := strconv.Atoi(c.PostForm("vnp_Amount"))
+		status := c.PostForm("vnp_ResponseCode")
+
+		if status == "00" {
+			// Cập nhật trạng thái đơn hàng là đã thanh toán thành công trong cơ sở dữ liệu của bạn
+			// Ví dụ: updateOrderStatus(orderId, "paid")
+
+			// Trả về trang cảm ơn
+			c.JSON(http.StatusOK, gin.H{
+				"order_id": orderId,
+				"amount":   amount,
+			})
+		} else {
+			// Xử lý trường hợp thanh toán không thành công
+			c.String(http.StatusOK, "Payment failed")
+		}
+	}
+}
+
+func PaymentByVnPay2() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
+		date := time.Now().In(loc)
+		createDate := date.Format("20060102150405")
+
+		ipAddr := c.Request.Header.Get("X-Forwarded-For")
+		if ipAddr == "" {
+			ipAddr = c.Request.RemoteAddr
+		}
+
+		tmnCode := os.Getenv("MERCHANT_ID")
+		secretKey := os.Getenv("SERCURE_HASH")
+		vnpURL := os.Getenv("VNP_URL")
+		returnURL := os.Getenv("VNP_RETURN_URL")
+
+		var payment models.RequestPayment
+		if err := c.BindJSON(&payment); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		bankCode := c.PostForm("bankCode")
+
+		var order models.Order
+
+		filter := bson.D{{"order_id", payment.OrderId}}
+		err := OrderCollection.FindOne(ctx, filter).Decode(&order)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if order.PaymentMethod != enum.VNPAY {
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{
+					"error": "Order is COD",
+				},
+			)
+		}
+
+		locale := c.PostForm("language")
+		if locale == "" {
+			locale = "vn"
+		}
+		currCode := "VND"
+
+		vnpParams := url.Values{}
+		vnpParams.Set("vnp_Version", "2.1.0")
+		vnpParams.Set("vnp_Command", "pay")
+		vnpParams.Set("vnp_TmnCode", tmnCode)
+		vnpParams.Set("vnp_Locale", locale)
+		vnpParams.Set("vnp_CurrCode", currCode)
+		vnpParams.Set("vnp_TxnRef", payment.OrderId)
+		vnpParams.Set("vnp_OrderInfo", "Thanh toan cho ma GD:"+payment.OrderId)
+		vnpParams.Set("vnp_OrderType", "other")
+		vnpParams.Set("vnp_Amount", payment.Amount)
+		vnpParams.Set("vnp_ReturnUrl", returnURL)
+		vnpParams.Set("vnp_IpAddr", ipAddr)
+		vnpParams.Set("vnp_CreateDate", createDate)
+		if bankCode != "" {
+			vnpParams.Set("vnp_BankCode", bankCode)
+		}
+
+		signData := strings.Join([]string{vnpParams.Encode()}, "&")
+		mac := hmac.New(sha512.New, []byte(secretKey))
+		mac.Write([]byte(signData))
+		signature := fmt.Sprintf("%x", mac.Sum(nil))
+
+		vnpParams.Set("vnp_SecureHash", signature)
+
+		vnpURL += "?" + vnpParams.Encode()
+
+		c.Redirect(http.StatusTemporaryRedirect, vnpURL)
+	}
+}
+
+func VnpayReturnHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		vnpParams := c.Request.URL.Query()
+		secureHash := vnpParams.Get("vnp_SecureHash")
+
+		delete(vnpParams, "vnp_SecureHash")
+		delete(vnpParams, "vnp_SecureHashType")
+
+		sortedParams := sortParams(vnpParams)
+
+		secretKey := os.Getenv("SERCURE_HASH")
+
+		signData := url.Values{}
+		for _, param := range sortedParams {
+			signData.Add(param[0], param[1])
+		}
+
+		hash := hmac.New(sha512.New, []byte(secretKey))
+		hash.Write([]byte(signData.Encode()))
+		signed := hex.EncodeToString(hash.Sum(nil))
+
+		if secureHash == signed {
+			orderId := vnpParams["vnp_TxnRef"]
+			update := bson.M{
+				"$set": models.Order{
+					IsPaid: true, // Simplified the bool expression
+				},
+			}
+			_, uErr := OrderCollection.UpdateOne(ctx, bson.D{{"order_id", orderId[0]}}, update)
+			if uErr != nil {
+				log.Println("UpdateOne error:", uErr)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": uErr.Error()})
+				return
+			}
+			// workerChannel <- orderId
+			c.Redirect(http.StatusSeeOther, "https://fashion-shop-client-379b8.web.app/thankyou")
+			return
+		}
+
+		c.String(http.StatusOK, "Failed! Response Code: 97")
+	}
+}
+
+func sortParams(params url.Values) [][2]string {
+	var sortedParams [][2]string
+	keys := make([]string, 0, len(params))
+	for k := range params {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		for _, v := range params[k] {
+			sortedParams = append(sortedParams, [2]string{k, v})
+		}
+	}
+	return sortedParams
+}
+
+func UpdateOrder(ctx context.Context, orderId string) {
+	update := bson.M{
+		"$set": models.Order{
+			IsPaid: true, // Simplified the bool expression
+		},
+	}
+	_, uErr := OrderCollection.UpdateOne(ctx, bson.D{{"order_id", orderId}}, update)
+	if uErr != nil {
+		log.Println("UpdateOne error:", uErr)
+		return
 	}
 }
