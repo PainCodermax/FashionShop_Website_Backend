@@ -703,13 +703,9 @@ func sortParams(params url.Values) [][2]string {
 }
 
 func UpdateOrder(orderId string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
-	update := bson.M{
-		"$set": models.Order{
-			Status: enum.Submitted, // Simplified the bool expression
-		},
-	}
+	var status enum.OrderStatus = enum.Submitted
 
 	var order models.Order
 	filter := bson.D{{"order_id", orderId}}
@@ -718,10 +714,15 @@ func UpdateOrder(orderId string) {
 		log.Println("UpdateOne error:", e)
 		return
 	}
+	update := bson.M{
+		"$set": models.Order{
+			Status: status, // Simplified the bool expression
+		},
+	}
 
 	if order.Status == enum.Pending {
 		if order.PaymentMethod == enum.VNPAY && !order.IsPaid {
-			return
+			status = enum.Cancelled
 		}
 		_, uErr := OrderCollection.UpdateOne(ctx, bson.D{{"order_id", orderId}}, update)
 		if uErr != nil {
@@ -732,16 +733,42 @@ func UpdateOrder(orderId string) {
 }
 
 func UpdateOrderStatus(order models.Order) {
-	// ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
 
-	// var status enum.OrderStatus = enum.Received
+	var status enum.OrderStatus = enum.Received
 
-	// if order.Status == enum.Submitted {
-	// 	status = enum.Processing
-	// }
+	if order.Status == enum.Submitted {
+		status = enum.Processing
+	}
 
-	// if order.Status == enum.Processing {
-	// 	status = enum.
-	// }
+	if order.Status == enum.Processing {
+		status = enum.Delivery
+	}
+
+	if order.Status == enum.Delivery {
+		status = enum.Shipping
+	}
+
+	update := bson.M{
+		"$set": models.Order{
+			Status: status,
+		},
+	}
+
+	if order.Status == enum.Delivery {
+		status = enum.Received
+		update = bson.M{
+			"$set": models.Order{
+				Status: status,
+				IsPaid: true,
+			},
+		}
+	}
+
+	_, uErr := OrderCollection.UpdateOne(ctx, bson.D{{"order_id", order.OrderID}}, update)
+	if uErr != nil {
+		log.Println("UpdateOne error:", uErr)
+		return
+	}
 }
