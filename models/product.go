@@ -12,5 +12,12 @@ type Product struct {
 	Quantity     *int               `json:"quantity,omitempty" bson:"quantity,omitempty"`
 	CategoryID   string             `json:"categoryID,omitempty" bson:"category_id,omitempty"`
 	Gender       string             `json:"gender,omitempty" bson:"gender,omitempty"`
-	CategoryMame string             `json:"categoryName,omitempty"`
+	CategoryMame string             `json:"categoryName,omitempty" bson:"categorymame,omitempty"`
+}
+
+type Recommendation struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Product_id_1 string             `json:"productId1,omitempty" bson:"product_id_1,omitempty"`
+	Product_id_2 string             `json:"productId2,omitempty" bson:"product_id_2,omitempty"`
+	Weight       float64            `json:"weight,omitempty" bson:"weight,omitempty"`
 }

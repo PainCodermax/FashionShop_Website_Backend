@@ -38,6 +38,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/users/product/:productId", controllers.GetProduct())
 	incomingRoutes.GET("/users/product", controllers.SearchProduct())
 	incomingRoutes.GET("/users/product-by-category", controllers.GetProductByCategory())
+	incomingRoutes.GET("/users/product/recommend/:productId", controllers.GetRecommendList())
 
 	//category
 	incomingRoutes.GET("/users/get-category/list", controllers.GetCategoryList())
@@ -86,4 +87,7 @@ func AdminRouter(incomingRoutes *gin.Engine) {
 
 	//delivery
 	incomingRoutes.GET("/admin/order/delivery/:orderID", controllers.GetDelivery())
+
+	//report
+	incomingRoutes.GET("/admin/report", controllers.GetReport())
 }

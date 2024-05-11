@@ -16,6 +16,7 @@ import (
 )
 
 var ProductCollection *mongo.Collection = database.ProductData(database.Client, "product")
+var RecommendationCollection *mongo.Collection = database.DB(database.Client, "recommendation")
 
 func GetListProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -32,13 +33,14 @@ func GetListProduct() gin.HandlerFunc {
 		if offset == 0 {
 			offset = 0
 		}
-
+		var listProduct []models.Product
+		skip := utils.ParseIn64ToPointer(offset * limit)
 		opt := options.FindOptions{
 			Limit: utils.ParseIn64ToPointer(limit),
-			Skip:  utils.ParseIn64ToPointer(offset * limit),
+			Skip:  skip,
 		}
 		result, err := ProductCollection.Find(ctx, bson.M{}, &opt)
-		var listProduct []models.Product
+
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
 			return
@@ -322,3 +324,86 @@ func GetProductByCategory() gin.HandlerFunc {
 	}
 }
 
+
+func GetRecommendList() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		productId := c.Param("productId")
+		if productId == "" {
+			c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
+			return
+		}
+
+		limit, _ := utils.ParseStringToIn64(c.Query("limit"))
+		offset, _ := utils.ParseStringToIn64(c.Query("offset"))
+		if limit == 0 {
+			limit = 20
+		}
+		if offset == 0 {
+			offset = 0
+		}
+		skip := offset * limit
+
+		opt := options.FindOptions{
+			Limit: utils.ParseIn64ToPointer(limit * 5),
+			Skip:  utils.ParseIn64ToPointer(skip),
+			Sort:  bson.D{{Key: "weight", Value: 1}},
+		}
+		filter := bson.D{{"product_id_1", productId}}
+
+		var listProductId []string
+		result, err := RecommendationCollection.Find(ctx, filter, &opt)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
+			return
+		}
+		defer result.Close(ctx)
+
+		for result.Next(ctx) {
+			singleRecommend := models.Recommendation{}
+			if err := result.Decode(&singleRecommend); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error decoding data"})
+				return
+			}
+			listProductId = append(listProductId, singleRecommend.Product_id_2)
+		}
+
+		if len(listProductId) == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"Message": "not found product"})
+			return
+		}
+
+		// Lấy danh sách sản phẩm từ ProductCollection
+		productOpt := options.FindOptions{
+			Limit: utils.ParseIn64ToPointer(limit),
+			Skip:  utils.ParseIn64ToPointer(skip),
+		}
+		products, err := ProductCollection.Find(ctx, bson.M{"product_id": bson.M{"$in": listProductId}}, &productOpt)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
+			return
+		}
+		defer products.Close(ctx)
+
+		var listProduct []models.Product
+		for products.Next(ctx) {
+			singleProduct := models.Product{}
+			if err := products.Decode(&singleProduct); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error decoding data"})
+				return
+			}
+			listProduct = append(listProduct, singleProduct)
+		}
+
+		totalCount, _ := RecommendationCollection.CountDocuments(ctx, filter)
+
+		c.JSON(http.StatusOK, models.ProductResponse{
+			Status:  200,
+			Message: "Get List product success",
+			Data:    listProduct,
+			Total:   int(totalCount),
+		})
+	}
+}
