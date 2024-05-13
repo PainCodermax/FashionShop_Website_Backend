@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/PainCodermax/FashionShop_Website_Backend/enum"
@@ -103,10 +104,25 @@ func GetReport() gin.HandlerFunc {
 				rp.TotalUser = totalUser
 
 				var amountList []models.Amount
-				for key, value := range months {
+				monthsSlice := []string{
+					"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+				}
+
+				// Tạo một map để ánh xạ từ tên tháng sang số thứ tự
+				monthIndex := make(map[string]int)
+				for i, month := range monthsSlice {
+					monthIndex[month] = i + 1 // Bắt đầu từ 1 thay vì 0
+				}
+
+				// Sắp xếp slice keys theo số thứ tự của các tháng
+				sort.Slice(monthsSlice, func(i, j int) bool {
+					return monthIndex[monthsSlice[i]] < monthIndex[monthsSlice[j]]
+				})
+				for _, month := range monthsSlice {
+					value := months[month]
 					amount := models.Amount{
 						TotalAmount: value,
-						Month:       key,
+						Month:       month,
 					}
 					amountList = append(amountList, amount)
 				}
