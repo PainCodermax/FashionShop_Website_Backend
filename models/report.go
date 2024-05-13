@@ -1,7 +1,7 @@
 package models
 
 type Amount struct {
-	Month       int  `bson:"_id"`
+	Month       string  `bson:"_id"`
 	TotalAmount int64 `bson:"totalAmount"`
 }
 

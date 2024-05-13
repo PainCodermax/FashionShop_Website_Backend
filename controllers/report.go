@@ -27,9 +27,36 @@ func GetReport() gin.HandlerFunc {
 
 				limit := int64(20)
 				offset := int64(0)
-				months := make(map[int]int64)
+				months := make(map[string]int64)
 				for i := 1; i <= 12; i++ {
-					months[i] = 0
+					month := ""
+					switch i {
+					case 1:
+						month = "January"
+					case 2:
+						month = "February"
+					case 3:
+						month = "March"
+					case 4:
+						month = "April"
+					case 5:
+						month = "May"
+					case 6:
+						month = "June"
+					case 7:
+						month = "July"
+					case 8:
+						month = "August"
+					case 9:
+						month = "September"
+					case 10:
+						month = "October"
+					case 11:
+						month = "November"
+					case 12:
+						month = "December"
+					}
+					months[month] = 0
 				}
 				for {
 					opt := options.FindOptions{
@@ -49,7 +76,7 @@ func GetReport() gin.HandlerFunc {
 							log.Println("Error decoding order:", err)
 							continue
 						}
-						month := int(order.Created_At.Month())
+						month := order.Created_At.Month().String()
 						if amount, ok := months[month]; ok {
 							months[month] += int64(order.Price) + amount
 						} else {
