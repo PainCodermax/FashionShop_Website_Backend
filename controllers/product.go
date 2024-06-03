@@ -203,6 +203,17 @@ func GetProduct() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		cateFilter := bson.D{{"category_id", foundProduct.CategoryID}}
+		category := make([]models.Category, 1)
+		cateErr := CategoryCollection.FindOne(ctx, cateFilter).Decode(&category[0])
+		if cateErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "cannot found"})
+			return
+		}
+		if len(category) > 0 {
+			foundProduct.CategoryMame = utils.ParsePoitnerToString(category[0].Name)
+			foundProduct.Gender = category[0].Gender
+		}
 		c.JSON(http.StatusOK, foundProduct)
 	}
 }
@@ -323,7 +334,6 @@ func GetProductByCategory() gin.HandlerFunc {
 		})
 	}
 }
-
 
 func GetRecommendList() gin.HandlerFunc {
 	return func(c *gin.Context) {

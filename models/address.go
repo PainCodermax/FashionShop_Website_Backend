@@ -1,5 +1,7 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type Province struct {
 	ProvinceID   int    `json:"ProvinceID,omitempty"`
 	ProvinceName string `json:"ProvinceName,omitempty"`
@@ -16,10 +18,12 @@ type Ward struct {
 }
 
 type UserAddress struct {
-	AddressID  string `json:"addressID,omitempty"`
-	UserID     string `json:"user_id,omitempty" bson:"user_id,omitempty"`
-	Street     string `json:"street"`
-	ProvinceID int    `json:"ProvinceID,omitempty"`
-	DistrictID int    `json:"DistrictID,omitempty"`
-	WardID     int    `json:"WardCode,omitempty"`
+	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+
+	AddressID  string `json:"addressID,omitempty" bson:"address_id,omitempty"`
+	UserID     string `json:"userId,omitempty" bson:"user_id,omitempty"`
+	Street     string `json:"street" bson:"street,omitempty"`
+	ProvinceID int    `json:"ProvinceID,omitempty" bson:"province_id,omitempty"`
+	DistrictID int    `json:"DistrictID,omitempty" bson:"district_id,omitempty"`
+	WardID     int    `json:"WardCode,omitempty" bson:"ward_id,omitempty"`
 }

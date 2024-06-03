@@ -83,7 +83,7 @@ func GetReport() gin.HandlerFunc {
 						} else {
 							months[month] = int64(order.Price)
 						}
-						log.Printf("Updated status for order %s\n", order.ID)
+						log.Printf("e %s\n", order.ID)
 					}
 					if err := rs.Err(); err != nil {
 						log.Println("Error iterating orders:", err)
@@ -108,13 +108,11 @@ func GetReport() gin.HandlerFunc {
 					"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
 				}
 
-				// Tạo một map để ánh xạ từ tên tháng sang số thứ tự
 				monthIndex := make(map[string]int)
 				for i, month := range monthsSlice {
 					monthIndex[month] = i + 1 // Bắt đầu từ 1 thay vì 0
 				}
 
-				// Sắp xếp slice keys theo số thứ tự của các tháng
 				sort.Slice(monthsSlice, func(i, j int) bool {
 					return monthIndex[monthsSlice[i]] < monthIndex[monthsSlice[j]]
 				})
