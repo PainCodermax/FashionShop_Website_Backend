@@ -13,6 +13,13 @@ type CategoryResponse struct {
 	Data    []Category `json:"data"`
 }
 
+type AddressResponse struct {
+	Status  int           `json:"status"`
+	Message string        `json:"message"`
+	Data    []UserAddress `json:"data"`
+	Total   int           `json:"total,omitempty"`
+}
+
 type CartItemResponse struct {
 	Status   int        `json:"status"`
 	Message  string     `json:"message"`
@@ -64,8 +71,8 @@ type DeliveryResponse struct {
 }
 
 type RatingResponse struct {
-	Status  int       `json:"status"`
-	Message string    `json:"message"`
+	Status  int      `json:"status"`
+	Message string   `json:"message"`
 	Data    []Rating `json:"data"`
-	Total   int       `json:"total,omitempty"`
+	Total   int      `json:"total,omitempty"`
 }

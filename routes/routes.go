@@ -64,6 +64,10 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/users/rating/:productId", controllers.GetRating())
 
 	incomingRoutes.POST("users/payment/vnpay", controllers.PaymentByVnPay2())
+
+	//address
+	incomingRoutes.POST("/users/address/add", controllers.AddAdressUser())
+	incomingRoutes.GET("/users/address/list", controllers.GetAddressUserList())
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {

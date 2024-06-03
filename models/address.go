@@ -22,7 +22,7 @@ type UserAddress struct {
 
 	AddressID  string `json:"addressID,omitempty" bson:"address_id,omitempty"`
 	UserID     string `json:"userId,omitempty" bson:"user_id,omitempty"`
-	Street     string `json:"street" bson:"street,omitempty"`
+	Street     string `json:"street,omitempty" bson:"street,omitempty"`
 	ProvinceID int    `json:"ProvinceID,omitempty" bson:"province_id,omitempty"`
 	DistrictID int    `json:"DistrictID,omitempty" bson:"district_id,omitempty"`
 	WardID     int    `json:"WardCode,omitempty" bson:"ward_id,omitempty"`

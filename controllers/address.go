@@ -56,22 +56,37 @@ func GetAddressUser() gin.HandlerFunc {
 	}
 }
 
-
 func GetAddressUserList() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
-		var address models.UserAddress
-		addressId := c.Query("addressId")
 
-		filter := bson.M{"address_id": addressId}
-		err := OrderCollection.FindOne(ctx, filter).Decode(&address)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, models.OrderResponse{
-				Message: "cannot find this order",
+		if userID, ok := c.Get("uid"); ok {
+			filter := bson.D{{"user_id", userID}}
+
+			rs, addErr := UserAddressCollection.Find(ctx, filter)
+			if addErr != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "not found"})
+				return
+			}
+			var address []models.UserAddress
+			for rs.Next(ctx) {
+				var singleAddress models.UserAddress
+				if err := rs.Decode(&singleAddress); err != nil {
+					c.JSON(http.StatusInternalServerError, models.AddressResponse{
+						Status:  500,
+						Message: "List product is empty",
+						Data:    []models.UserAddress{},
+					})
+				}
+				address = append(address, singleAddress)
+			}
+			c.JSON(http.StatusOK, models.AddressResponse{
+				Status:  200,
+				Message: "get product list success",
+				Data:    address,
+				Total:   len(address),
 			})
-			return
 		}
-		c.JSON(http.StatusOK, address)
 	}
 }
