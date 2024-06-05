@@ -16,7 +16,6 @@ func LoginRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/verify", controllers.VerifyUser())
 	incomingRoutes.POST("/users/forget-password", controllers.ForGotPassword())
 	incomingRoutes.PUT("/users/update-password", controllers.UpdatePassWord())
-
 }
 
 func UserRoutes(incomingRoutes *gin.Engine) {
@@ -27,7 +26,6 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 
 	WorkerChannel := make(chan string)
 	go worker.Worker(ctx, WorkerChannel)
-
 	//users
 	incomingRoutes.POST("/users/get-token", controllers.GetNewToken())
 	incomingRoutes.GET("/users/get-user", controllers.GetUser())
@@ -68,6 +66,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	//address
 	incomingRoutes.POST("/users/address/add", controllers.AddAdressUser())
 	incomingRoutes.GET("/users/address/list", controllers.GetAddressUserList())
+
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {
@@ -94,4 +93,8 @@ func AdminRouter(incomingRoutes *gin.Engine) {
 
 	//report
 	incomingRoutes.GET("/admin/report", controllers.GetReport())
+
+	//flashSale
+	incomingRoutes.GET("/admin/flashSale/list", controllers.GetReport())
+	incomingRoutes.POST("/admin/flashSale/get", controllers.GetReport())
 }

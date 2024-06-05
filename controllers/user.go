@@ -153,6 +153,22 @@ func SignUp() gin.HandlerFunc {
 		user.Refresh_Token = &refreshtoken
 		user.VerifyCode = utils.GenerateCode("VRF", 6)
 
+		var address models.UserAddress
+
+		address.Name = *user.First_Name + *user.Last_Name
+		address.DistrictID = user.District
+		address.AddressID = utils.GenerateCode("ADD", 6)
+		address.UserID = user.User_ID
+		address.WardID = user.Ward
+		address.ProvinceID = user.Province
+		address.IsDefault = true
+		address.Phone = *user.Phone
+
+		_, addressErr := UserAddressCollection.InsertOne(ctx, address)
+		if addressErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "not created address"})
+			return
+		}
 		mailErr := email.SendOPTMail(*user.Email, user.VerifyCode, true)
 		if mailErr != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "email not found"})
