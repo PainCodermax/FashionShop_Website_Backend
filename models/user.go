@@ -31,6 +31,7 @@ type User struct {
 	IsAdmin    bool   `json:"isAdmin,omitempty" bson:"is_admin,omitempty"`
 	VerifyCode string `json:"verifyCode,omitempty" bson:"verify_code,omitempty"`
 	IsVerified bool   `json:"isVerified,omitempty" bson:"is_verified,omitempty"`
+	IsActive   bool   `json:"isActive,omitempty" bson:"is_active,omitempty"`
 }
 
 type ProductUser struct {

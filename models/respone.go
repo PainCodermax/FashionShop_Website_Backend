@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type ProductResponse struct {
 	Status  int       `json:"status"`
 	Message string    `json:"message"`
@@ -21,14 +23,15 @@ type AddressResponse struct {
 }
 
 type CartItemResponse struct {
-	Status   int        `json:"status"`
-	Message  string     `json:"message"`
-	Data     []CartItem `json:"data"`
-	Total    int        `json:"total,omitempty"`
-	Province string     `json:"province,omitempty" bson:"-"`
-	District string     `json:"district,omitempty" bson:"-"`
-	Ward     string     `json:"ward,omitempty" bson:"-"`
-	ShipFee  int        `json:"shipFee,omitempty" bson:"-"`
+	Status       int        `json:"status"`
+	Message      string     `json:"message"`
+	Data         []CartItem `json:"data"`
+	Total        int        `json:"total,omitempty"`
+	Province     string     `json:"province,omitempty" bson:"-"`
+	District     string     `json:"district,omitempty" bson:"-"`
+	Ward         string     `json:"ward,omitempty" bson:"-"`
+	ShipFee      int        `json:"shipFee,omitempty" bson:"-"`
+	DeliveryDate time.Time  `json:"deliveryDate,omitempty"`
 
 	TotalPrice int `json:"total_price,omitempty"`
 }
@@ -75,4 +78,10 @@ type RatingResponse struct {
 	Message string   `json:"message"`
 	Data    []Rating `json:"data"`
 	Total   int      `json:"total,omitempty"`
+}
+
+type UserResponse struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+	Data    []User `json:"data"`
 }

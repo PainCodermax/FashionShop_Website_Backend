@@ -70,6 +70,9 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {
+	//user
+	incomingRoutes.GET("/users/address/list", controllers.GetUserList())
+	incomingRoutes.GET("/users/address/:userId", controllers.GetSingleUser())
 
 	//product
 	incomingRoutes.POST("/admin/product/add", controllers.AddProduct())

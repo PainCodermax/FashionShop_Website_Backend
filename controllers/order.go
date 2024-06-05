@@ -354,6 +354,7 @@ func GetRawOrder() gin.HandlerFunc {
 			TotalPrice: totalPrice,
 			Data:       items,
 			ShipFee:    fee,
+			DeliveryDate: time.Now().Add(7 * 24 * time.Hour), 
 			Province:   user.Province,
 			District:   user.District,
 			Ward:       user.Ward,
