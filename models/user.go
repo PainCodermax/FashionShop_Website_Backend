@@ -22,6 +22,7 @@ type User struct {
 	Province string `json:"province,omitempty" bson:"province,omitempty"`
 	District string `json:"district,omitempty" bson:"district,omitempty"`
 	Ward     string `json:"ward,omitempty" bson:"ward,omitempty"`
+	Street   string `json:"street,omitempty" bson:"street,omitempty"`
 
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`

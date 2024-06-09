@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/client"
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
@@ -27,6 +28,7 @@ func AddAdressUser() gin.HandlerFunc {
 			}
 			address.UserID = utils.InterfaceToString(userID)
 			address.AddressID = utils.GenerateCode("ADD", 6)
+			address.FullAddress = address.Street + ", " + client.GetAddressString(address.ProvinceID, address.DistrictID, address.WardID)
 			_, addErr := UserAddressCollection.InsertOne(ctx, address)
 			if addErr != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "not created"})

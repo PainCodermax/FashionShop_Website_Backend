@@ -32,6 +32,7 @@ type CartItemResponse struct {
 	Ward         string     `json:"ward,omitempty" bson:"-"`
 	ShipFee      int        `json:"shipFee,omitempty" bson:"-"`
 	DeliveryDate time.Time  `json:"deliveryDate,omitempty"`
+	Street       string     `json:"street,omitempty" bson:"street,omitempty"`
 
 	TotalPrice int `json:"total_price,omitempty"`
 }

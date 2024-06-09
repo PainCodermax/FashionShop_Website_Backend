@@ -1,6 +1,10 @@
 package models
 
-import "github.com/PainCodermax/FashionShop_Website_Backend/enum"
+import (
+	"net/http"
+
+	"github.com/PainCodermax/FashionShop_Website_Backend/enum"
+)
 
 type RequestOrder struct {
 	CartID        string             `json:"cartID,omitempty"`
@@ -15,4 +19,9 @@ type RequestOrder struct {
 type RequestPayment struct {
 	OrderId string `json:"orderId,omitempty"`
 	Amount  string `json:"amount,omitempty"`
+}
+
+type RequestResult struct {
+	Response *http.Response
+	Error    error
 }

@@ -348,18 +348,18 @@ func GetRawOrder() gin.HandlerFunc {
 		fee := client.CheckShipingFee("", user.District, user.Ward)
 
 		c.JSON(http.StatusOK, models.CartItemResponse{
-			Status:     200,
-			Message:    "Get cart successfully",
-			Total:      total,
-			TotalPrice: totalPrice,
-			Data:       items,
-			ShipFee:    fee,
-			DeliveryDate: time.Now().Add(7 * 24 * time.Hour), 
-			Province:   user.Province,
-			District:   user.District,
-			Ward:       user.Ward,
+			Status:       200,
+			Message:      "Get cart successfully",
+			Total:        total,
+			TotalPrice:   totalPrice,
+			Data:         items,
+			ShipFee:      fee,
+			DeliveryDate: time.Now().Add(7 * 24 * time.Hour),
+			Province:     user.Province,
+			District:     user.District,
+			Ward:         user.Ward,
+			Street:       user.Street,
 		})
-
 	}
 }
 
