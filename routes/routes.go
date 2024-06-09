@@ -71,8 +71,9 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 
 func AdminRouter(incomingRoutes *gin.Engine) {
 	//user
-	incomingRoutes.GET("/amdin/user/list", controllers.GetUserList())
-	incomingRoutes.GET("/admin/user/:userId", controllers.GetSingleUser())
+	incomingRoutes.GET("/admin/user/list", controllers.GetUserList())
+	incomingRoutes.GET("/admin/user/get/:userId", controllers.GetSingleUser())
+	incomingRoutes.PUT("/admin/user/:userId", controllers.AdminUpdateUser())
 
 	//product
 	incomingRoutes.POST("/admin/product/add", controllers.AddProduct())

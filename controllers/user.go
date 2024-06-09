@@ -341,50 +341,105 @@ func GetUser() gin.HandlerFunc {
 
 func GetSingleUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-		defer cancel()
-		userId := c.Param("userId")
-		// if !ok {
-		// 	c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
-		// 	return
-		// }
-		var foundUser models.User
-		err := UserCollection.FindOne(ctx, bson.M{"user_id": userId}).Decode(&foundUser)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
-			return
+		if value, ok := c.Get("isAdmin"); ok {
+			if value == true {
+				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+				defer cancel()
+				userId := c.Param("userId")
+				// if !ok {
+				// 	c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+				// 	return
+				// }
+				var foundUser models.User
+				err := UserCollection.FindOne(ctx, bson.M{"user_id": userId}).Decode(&foundUser)
+				if err != nil {
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
+					return
+				}
+				c.JSON(http.StatusOK, foundUser)
+			}
+			if value == false {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Not have authorization"})
+				return
+			}
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
 		}
-		c.JSON(http.StatusOK, foundUser)
 	}
 }
 
 func GetUserList() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-		defer cancel()
-		filter := bson.D{}
-		var users []models.User
-		result, err := UserCollection.Find(ctx, filter)
-		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"message": "cannot get user list !!"})
-			return
-		}
+		if value, ok := c.Get("isAdmin"); ok {
+			if value == true {
+				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+				defer cancel()
+				filter := bson.D{}
+				var users []models.User
+				result, err := UserCollection.Find(ctx, filter)
+				if err != nil {
+					c.JSON(http.StatusNotFound, gin.H{"message": "cannot get user list !!"})
+					return
+				}
 
-		for result.Next(ctx) {
-			singleUser := models.User{}
-			if err := result.Decode(&singleUser); err != nil {
-				c.JSON(http.StatusInternalServerError, models.UserResponse{
-					Status:  500,
-					Message: "List user is empty",
-					Data:    []models.User{},
+				for result.Next(ctx) {
+					singleUser := models.User{}
+					if err := result.Decode(&singleUser); err != nil {
+						c.JSON(http.StatusInternalServerError, models.UserResponse{
+							Status:  500,
+							Message: "List user is empty",
+							Data:    []models.User{},
+						})
+					}
+					users = append(users, singleUser)
+				}
+				c.JSON(http.StatusOK, models.UserResponse{
+					Status:  200,
+					Message: "Get list category successfully",
+					Data:    users,
 				})
+				return
 			}
-			users = append(users, singleUser)
+			if value == false {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Not have authorization"})
+				return
+			}
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
 		}
-		c.JSON(http.StatusOK, models.UserResponse{
-			Status:  200,
-			Message: "Get list category successfully",
-			Data:    users,
-		})
+	}
+}
+
+func AdminUpdateUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if value, ok := c.Get("isAdmin"); ok {
+			if value == true {
+				userId := c.Param("userId")
+				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+				defer cancel()
+				var user models.User
+				var foundUser models.User
+				if err := c.BindJSON(&user); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err})
+					return
+				}
+
+				err := UserCollection.FindOne(ctx, bson.M{"user_id": userId}).Decode(&foundUser)
+				if err != nil {
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "can not find"})
+					return
+				}
+				filter := bson.D{{"email", foundUser.Email}}
+				update := bson.M{"$set": user}
+				_, upErr := UserCollection.UpdateOne(ctx, filter, update)
+				if upErr != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				c.JSON(http.StatusOK, "update user success")
+			}
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		}
 	}
 }
