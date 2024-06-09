@@ -137,9 +137,13 @@ func GetListOrder() gin.HandlerFunc {
 			return
 		}
 
+		opt := options.FindOptions{
+			Sort: bson.D{{Key: "created_at", Value: -1}},
+		}
+
 		rs, err := OrderCollection.Find(ctx, bson.D{{
 			"user_id", userID,
-		}})
+		}}, &opt)
 
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "cannot found"})
@@ -266,6 +270,7 @@ func GetAllOrder() gin.HandlerFunc {
 		opt := options.FindOptions{
 			Limit: utils.ParseIn64ToPointer(limit),
 			Skip:  utils.ParseIn64ToPointer(offset * limit),
+			Sort:  bson.D{{Key: "created_at", Value: -1}},
 		}
 
 		rs, err := OrderCollection.Find(ctx, bson.M{}, &opt)

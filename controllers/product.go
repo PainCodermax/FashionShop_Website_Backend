@@ -38,6 +38,7 @@ func GetListProduct() gin.HandlerFunc {
 		opt := options.FindOptions{
 			Limit: utils.ParseIn64ToPointer(limit),
 			Skip:  skip,
+			Sort:  bson.D{{Key: "created_at", Value: -1}},
 		}
 		result, err := ProductCollection.Find(ctx, bson.M{}, &opt)
 

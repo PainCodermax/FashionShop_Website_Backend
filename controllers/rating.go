@@ -40,6 +40,7 @@ func CreateRating() gin.HandlerFunc {
 		}
 		rating.User_ID = utils.InterfaceToString(userID)
 		rating.User = founduser
+		rating.Created_At = time.Now()
 
 		if rating.OrderID != nil {
 			var order models.Order
@@ -98,6 +99,7 @@ func GetRating() gin.HandlerFunc {
 		opt := options.FindOptions{
 			Limit: utils.ParseIn64ToPointer(limit),
 			Skip:  utils.ParseIn64ToPointer(offset * limit),
+			Sort:  bson.D{{Key: "created_at", Value: -1}},
 		}
 		result, err := RatingCollection.Find(ctx, bson.D{{"product_id", productId}}, &opt)
 		var listRating []models.Rating

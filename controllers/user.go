@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -208,6 +209,7 @@ func VerifyUser() gin.HandlerFunc {
 
 		if request.VerifyCode == user.VerifyCode {
 			user.IsVerified = true
+			user.IsActive = true
 			userUpdate := bson.M{
 				"$set": user,
 			}
@@ -376,7 +378,21 @@ func GetUserList() gin.HandlerFunc {
 				defer cancel()
 				filter := bson.D{}
 				var users []models.User
-				result, err := UserCollection.Find(ctx, filter)
+				limit, _ := utils.ParseStringToIn64(c.Query("limit"))
+				offset, _ := utils.ParseStringToIn64(c.Query("offset"))
+				if limit == 0 {
+					limit = 20
+				}
+				if offset == 0 {
+					offset = 0
+				}
+				skip := utils.ParseIn64ToPointer(offset * limit)
+				opt := options.FindOptions{
+					Limit: utils.ParseIn64ToPointer(limit),
+					Skip:  skip,
+					Sort:  bson.D{{Key: "created_at", Value: -1}},
+				}
+				result, err := UserCollection.Find(ctx, filter, &opt)
 				if err != nil {
 					c.JSON(http.StatusNotFound, gin.H{"message": "cannot get user list !!"})
 					return

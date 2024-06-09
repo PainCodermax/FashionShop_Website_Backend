@@ -67,6 +67,10 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/address/add", controllers.AddAdressUser())
 	incomingRoutes.GET("/users/address/list", controllers.GetAddressUserList())
 
+	//WishItem
+	incomingRoutes.POST("/users/wish-list/add", controllers.LikeItem())
+	incomingRoutes.DELETE("/users/wish-list/:itemId", controllers.UnLikeItem())
+	incomingRoutes.GET("/users/wish-list/list", controllers.GetWishList())
 }
 
 func AdminRouter(incomingRoutes *gin.Engine) {
@@ -99,6 +103,6 @@ func AdminRouter(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/admin/report", controllers.GetReport())
 
 	//flashSale
-	incomingRoutes.GET("/admin/flashSale/list", controllers.GetReport())
-	incomingRoutes.POST("/admin/flashSale/get", controllers.GetReport())
+	incomingRoutes.GET("/admin/flash-sale/list", controllers.GetReport())
+	incomingRoutes.POST("/admin/flash-sale/get", controllers.GetReport())
 }
