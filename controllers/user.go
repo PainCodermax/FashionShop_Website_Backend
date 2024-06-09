@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/client"
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/email"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
@@ -407,6 +408,7 @@ func GetUserList() gin.HandlerFunc {
 							Data:    []models.User{},
 						})
 					}
+					singleUser.FullAddress = singleUser.Street + ", " + client.GetAddressString(singleUser.Province, singleUser.District, singleUser.Ward)
 					users = append(users, singleUser)
 				}
 				c.JSON(http.StatusOK, models.UserResponse{

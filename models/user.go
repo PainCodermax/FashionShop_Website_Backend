@@ -19,10 +19,11 @@ type User struct {
 	Refresh_Token *string `json:"refresh_token,omitempty" bson:"refresh_token"`
 
 	//address
-	Province string `json:"province,omitempty" bson:"province,omitempty"`
-	District string `json:"district,omitempty" bson:"district,omitempty"`
-	Ward     string `json:"ward,omitempty" bson:"ward,omitempty"`
-	Street   string `json:"street,omitempty" bson:"street,omitempty"`
+	Province    string `json:"province,omitempty" bson:"province,omitempty"`
+	District    string `json:"district,omitempty" bson:"district,omitempty"`
+	Ward        string `json:"ward,omitempty" bson:"ward,omitempty"`
+	Street      string `json:"street,omitempty" bson:"street,omitempty"`
+	FullAddress string `json:"fullAddress,omitempty" bson:"full_address,omitempty"`
 
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`
