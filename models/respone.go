@@ -86,3 +86,10 @@ type UserResponse struct {
 	Message string `json:"message"`
 	Data    []User `json:"data"`
 }
+
+type FlashSalehResponse struct {
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
+	Data    []FlashSale `json:"data"`
+	Total   int      `json:"total,omitempty"`
+}

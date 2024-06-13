@@ -113,7 +113,7 @@ func GetRating() gin.HandlerFunc {
 			if err := result.Decode(&singleRating); err != nil {
 				c.JSON(http.StatusInternalServerError, models.ProductResponse{
 					Status:  500,
-					Message: "List product is empty",
+					Message: "List rating is empty",
 					Data:    []models.Product{},
 				})
 				return
@@ -122,7 +122,7 @@ func GetRating() gin.HandlerFunc {
 		}
 		c.JSON(http.StatusOK, models.RatingResponse{
 			Status:  200,
-			Message: "Get List product success",
+			Message: "Get List rating success",
 			Data:    listRating,
 			Total:   int(totalCount),
 		})

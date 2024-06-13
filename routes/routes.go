@@ -103,6 +103,8 @@ func AdminRouter(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/admin/report", controllers.GetReport())
 
 	//flashSale
-	incomingRoutes.GET("/admin/flash-sale/list", controllers.GetReport())
-	incomingRoutes.POST("/admin/flash-sale/get", controllers.GetReport())
+	incomingRoutes.GET("/admin/flash-sale/list", controllers.GetFlashSales())
+	incomingRoutes.GET("/admin/flash-sale/:flashSaleId", controllers.GetFlashSale())
+	incomingRoutes.POST("/admin/flash-sale/add", controllers.AddFlashSale())
+	incomingRoutes.PUT("/admin/flash-sale/:flashSaleId", controllers.UpdateFlashSale())
 }
