@@ -12,8 +12,8 @@ type FlashSale struct {
 	FlashSaleId   string    `json:"flashSaleId,omitempty" bson:"flash_sale_id,omitempty"`
 	ProductIdList []string  `json:"productIdList,omitempty" bson:"product_id_list,omitempty"`
 	Discount      int       `json:"discount,omitempty" bson:"discount,omitempty"`
-	TimeStarted   time.Time `json:"timeStarted,omitempty" bson:"time_started,omitempty"`
-	TimeExpired   time.Time `json:"timeExpired,omitempty" bson:"time_expired,omitempty"`
+	TimeStarted   *time.Time `json:"timeStarted" bson:"time_started,omitempty"`
+	TimeExpired   *time.Time `json:"timeExpired" bson:"time_expired,omitempty"`
 	ProductList   []Product `json:"productList,omitempty" bson:"-"`
 
 	Created_At time.Time `json:"created_at" bson:"created_at"`

@@ -30,6 +30,8 @@ func AddFlashSale() gin.HandlerFunc {
 				}
 				flashSale.ID = primitive.NewObjectID()
 				flashSale.FlashSaleId = utils.GenerateCode("FLASH", 7)
+				flashSale.Created_At = time.Now()
+
 				_, anyerr := FlashSaleCollection.InsertOne(ctx, flashSale)
 				if anyerr != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "Not Created"})
@@ -167,6 +169,7 @@ func UpdateFlashSale() gin.HandlerFunc {
 			if value == true {
 				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 				var flashSale models.FlashSale
+				var newFlashSale models.FlashSale
 				defer cancel()
 				flashSaleId := c.Param("flashSaleId")
 
@@ -176,45 +179,44 @@ func UpdateFlashSale() gin.HandlerFunc {
 				}
 
 				filter := bson.D{{"flash_sale_id", flashSaleId}}
-				update := bson.M{
-					"$set": flashSale,
+
+				anyerr := FlashSaleCollection.FindOne(ctx, filter).Decode(&newFlashSale)
+				if anyerr != nil {
+					c.JSON(http.StatusNotFound, gin.H{"error": "Not Found"})
+					return
 				}
 
-				_, err := ProductCollection.UpdateOne(ctx, filter, update)
+				if flashSale.Discount > 0 {
+					newFlashSale.Discount = flashSale.Discount
+				}
+
+				if len(flashSale.ProductIdList) > 0 {
+					newFlashSale.ProductIdList = flashSale.ProductIdList
+				}
+
+				if flashSale.TimeExpired != nil {
+					newFlashSale.TimeExpired = flashSale.TimeExpired
+				}
+
+				if flashSale.TimeStarted != nil {
+					newFlashSale.TimeStarted = flashSale.TimeStarted
+				}
+
+				newFlashSale.Updated_At = time.Now()
+				update := bson.M{
+					"$set": newFlashSale,
+				}
+				_, err := FlashSaleCollection.UpdateOne(ctx, filter, update)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 					return
 				}
 
-				filter = bson.D{
-					{"product_id", bson.D{
-						{"$in", flashSale.ProductIdList},
-					}},
-				}
-
-				// filter = bson.D{{"product_id", bson.D{{"$in", flashSale.ProductIdList}}}}
-				rs, err := ProductCollection.Find(ctx, filter)
-				if err != nil {
-					c.JSON(http.StatusNotFound, gin.H{"error": "Not Found"})
-					return
-				}
-				var productList []models.Product
-
-				if err = rs.All(ctx, &productList); err != nil {
-					c.JSON(http.StatusNotFound, gin.H{"error": "Not Found"})
-					return
-				}
-
-				for i := range productList {
-					productList[i].FlashSalePrice = *productList[i].Price - (*productList[i].Price/100)*flashSale.Discount
-				}
-				flashSale.ProductList = productList
-
 				defer cancel()
 				c.JSON(http.StatusOK, models.FlashSalehResponse{
 					Status:  200,
 					Message: "update flashsale successfully",
-					Data:    []models.FlashSale{flashSale},
+					Data:    []models.FlashSale{newFlashSale},
 				})
 			}
 			if value == false {
