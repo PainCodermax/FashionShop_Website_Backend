@@ -311,6 +311,14 @@ func GetRawOrder() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
 			return
 		}
+
+		var address models.UserAddress
+
+		if err := c.BindJSON(&address); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
 		var cart models.Cart
 		var items []models.CartItem
 		var user models.User
@@ -360,10 +368,10 @@ func GetRawOrder() gin.HandlerFunc {
 			Data:         items,
 			ShipFee:      fee,
 			DeliveryDate: time.Now().Add(7 * 24 * time.Hour),
-			Province:     user.Province,
-			District:     user.District,
-			Ward:         user.Ward,
-			Street:       user.Street,
+			Province:     address.ProvinceID,
+			District:     address.DistrictID,
+			Ward:         address.WardID,
+			Street:       address.Street,
 		})
 	}
 }
