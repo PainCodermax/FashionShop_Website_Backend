@@ -31,6 +31,9 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/users/get-user", controllers.GetUser())
 	incomingRoutes.PUT("/users/update-user", controllers.UpdateUser())
 
+	// flashsale
+	incomingRoutes.GET("/users/flashsale", controllers.GetLatestFlashSale())
+
 	// product
 	incomingRoutes.GET("/users/product/list", controllers.GetListProduct())
 	incomingRoutes.GET("/users/product/:productId", controllers.GetProduct())

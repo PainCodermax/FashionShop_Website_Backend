@@ -228,3 +228,65 @@ func UpdateFlashSale() gin.HandlerFunc {
 		}
 	}
 }
+
+func GetLatestFlashSale() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var flashSale models.FlashSale
+		defer cancel()
+
+		opt := options.FindOneOptions{
+			Sort: bson.D{{Key: "created_at", Value: -1}},
+		}
+
+		result := FlashSaleCollection.FindOne(ctx, bson.D{{}}, &opt)
+		singleFlashSale := models.FlashSale{}
+		if err := result.Decode(&singleFlashSale); err != nil {
+			c.JSON(http.StatusInternalServerError, models.ProductResponse{
+				Status:  500,
+				Message: "Flash sale not found",
+				Data:    []models.Product{},
+			})
+			return
+		}
+
+		filter := bson.D{{"flash_sale_id", singleFlashSale.FlashSaleId}}
+		anyerr := FlashSaleCollection.FindOne(ctx, filter).Decode(&flashSale)
+		if anyerr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not Found"})
+			return
+		}
+
+		filter = bson.D{
+			{"product_id", bson.D{
+				{"$in", flashSale.ProductIdList},
+			}},
+		}
+
+		// filter = bson.D{{"product_id", bson.D{{"$in", flashSale.ProductIdList}}}}
+		rs, err := ProductCollection.Find(ctx, filter)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not Found"})
+			return
+		}
+		var productList []models.Product
+
+		if err = rs.All(ctx, &productList); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not Found"})
+			return
+		}
+
+		for i := range productList {
+			productList[i].FlashSalePrice = *productList[i].Price - (*productList[i].Price/100)*flashSale.Discount
+		}
+		flashSale.ProductList = productList
+
+		defer cancel()
+		c.JSON(http.StatusOK, models.FlashSalehResponse{
+			Status:  200,
+			Message: "get flashsale successfully",
+			Data:    []models.FlashSale{flashSale},
+		})
+	}
+}
