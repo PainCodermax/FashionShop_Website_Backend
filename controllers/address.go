@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var UserAddressCollection *mongo.Collection = database.ProductData(database.Client, "user_address")
@@ -66,7 +67,10 @@ func GetAddressUserList() gin.HandlerFunc {
 		if userID, ok := c.Get("uid"); ok {
 			filter := bson.D{{"user_id", userID}}
 
-			rs, addErr := UserAddressCollection.Find(ctx, filter)
+			opt := options.FindOptions{
+				Sort: bson.D{{Key: "created_at", Value: -1}},
+			}
+			rs, addErr := UserAddressCollection.Find(ctx, filter, &opt)
 			if addErr != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "not found"})
 				return

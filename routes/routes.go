@@ -52,7 +52,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/users/orders", controllers.GetListOrder())
 	incomingRoutes.PUT("/users/orders/cancel/:orderId", controllers.CancelOrder())
 	incomingRoutes.GET("/users/orders/get-single", controllers.GetOrder())
-	incomingRoutes.GET("/users/orders/get-raw-order", controllers.GetRawOrder())
+	incomingRoutes.POST("/users/orders/get-raw-order", controllers.GetRawOrder())
 	incomingRoutes.PUT("/users/order/update", controllers.GetOneOrder())
 	//address
 	// incomingRoutes.POST("/users/address", controllers.AddAddress())

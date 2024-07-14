@@ -20,6 +20,7 @@ type Ward struct {
 	WardName string `json:"WardName,omitempty"`
 }
 
+//struct for address of user
 type UserAddress struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 

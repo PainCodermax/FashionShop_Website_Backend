@@ -335,6 +335,13 @@ func GetRawOrder() gin.HandlerFunc {
 			return
 		}
 
+		if address.ProvinceID == "" || address.WardID == "" {
+			address.ProvinceID = user.Province
+			address.DistrictID = user.District
+			address.WardID = user.Ward
+			address.Street = user.Street
+		}
+
 		filter := bson.D{{"cart_id", cart.CartID}}
 		rs, findErr := CartItemCollection.Find(ctx, filter)
 		if findErr != nil {
