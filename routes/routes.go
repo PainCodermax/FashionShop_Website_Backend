@@ -72,7 +72,7 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 
 	//WishItem
 	incomingRoutes.POST("/users/wish-list/add", controllers.LikeItem())
-	incomingRoutes.DELETE("/users/wish-list/:itemId", controllers.UnLikeItem())
+	incomingRoutes.DELETE("/users/wish-list/:id", controllers.UnLikeItem())
 	incomingRoutes.GET("/users/wish-list/list", controllers.GetWishList())
 }
 

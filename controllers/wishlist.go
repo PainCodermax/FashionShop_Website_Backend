@@ -44,7 +44,10 @@ func LikeItem() gin.HandlerFunc {
 		}
 		wishItem.UserId = utils.InterfaceToString(userID)
 		var newWish models.WishItem
-		if err := WishItemCollection.FindOne(ctx, bson.M{}).Decode(&newWish); err == nil {
+		if err := WishItemCollection.FindOne(ctx, bson.M{
+			"product_id": wishItem.ProductId,
+			"user_id":    userID,
+		}).Decode(&newWish); err == nil {
 			c.JSON(http.StatusOK, "Successfully add wishlist!!")
 			return
 		}
@@ -84,13 +87,21 @@ func UnLikeItem() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
-		wishItemId := c.Param("itemId")
-		if wishItemId == "" {
+		product_id := c.Param("id")
+		userID, ok := c.Get("uid")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+			return
+		}
+		if product_id == "" {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong id not provided"})
 			c.Abort()
 			return
 		}
-		filter := bson.D{{"wish_list_id", wishItemId}}
+		filter := bson.M{
+			"product_id": product_id,
+			"user_id":    userID,
+		}
 		_, err := WishItemCollection.DeleteOne(ctx, filter)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
