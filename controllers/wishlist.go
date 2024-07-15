@@ -43,6 +43,11 @@ func LikeItem() gin.HandlerFunc {
 			return
 		}
 		wishItem.UserId = utils.InterfaceToString(userID)
+		var newWish models.WishItem
+		if err := WishItemCollection.FindOne(ctx, bson.M{}).Decode(&newWish); err == nil {
+			c.JSON(http.StatusOK, "Successfully add wishlist!!")
+			return
+		}
 		wishItem.WishItemId = utils.GenerateCode("WISH", 7)
 		if wishItem.ProductId != "" {
 			f := bson.M{"user_id": userID, "product_id": wishItem.ProductId}
