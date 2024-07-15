@@ -658,7 +658,6 @@ func PaymentByVnPay2() gin.HandlerFunc {
 			"message": "get vnpay payment success",
 			"url":     vnpURL,
 		})
-
 	}
 }
 
