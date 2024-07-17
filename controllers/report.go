@@ -15,6 +15,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type filter struct {
+	From time.Time `json:"from,ommitempty"`
+	To   time.Time `json:"to,ommitempty"`
+}
+
 func GetReport() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if value, ok := c.Get("isAdmin"); ok {
@@ -22,12 +27,33 @@ func GetReport() gin.HandlerFunc {
 				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 				defer cancel()
 
-				
+				var fil filter
+				if err := c.BindJSON(&fil); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					return
+				}
 
-				totalUser, _ := UserCollection.CountDocuments(ctx, bson.M{})
-				totalOrder, _ := OrderCollection.CountDocuments(ctx, bson.M{})
-				totalProduct, _ := ProductCollection.CountDocuments(ctx, bson.M{})
-				totalOrderSuccess, _ := OrderCollection.CountDocuments(ctx, bson.M{"status": enum.Received})
+				filterCondition := bson.M{}
+				filterOrderSuccess := bson.M{"status": enum.Received}
+				// Nếu có ngày From và To, cập nhật điều kiện lọc
+				if !fil.From.IsZero() && !fil.To.IsZero() {
+					filterCondition = bson.M{
+						"created_at": bson.M{
+							"$gte": fil.From,
+							"$lte": fil.To,
+						},
+					}
+					filterOrderSuccess["created_at"] = bson.M{
+						"$gte": fil.From,
+						"$lte": fil.To,
+					}
+				}
+
+				totalUser, _ := UserCollection.CountDocuments(ctx, filterCondition)
+				totalOrder, _ := OrderCollection.CountDocuments(ctx, filterCondition)
+				totalProduct, _ := ProductCollection.CountDocuments(ctx, filterCondition)
+				totalOrderSuccess, _ := OrderCollection.CountDocuments(ctx, filterOrderSuccess)
+				totalRating, _ := RatingCollection.CountDocuments(ctx, filterCondition)
 
 				limit := int64(20)
 				offset := int64(0)
@@ -105,6 +131,7 @@ func GetReport() gin.HandlerFunc {
 				rp.TotalOrderSuccess = totalOrderSuccess
 				rp.TotalProduct = totalProduct
 				rp.TotalUser = totalUser
+				rp.TotalRating = totalRating
 
 				var amountList []models.Amount
 				monthsSlice := []string{

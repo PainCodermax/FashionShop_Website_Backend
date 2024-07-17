@@ -103,7 +103,7 @@ func AdminRouter(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/admin/order/delivery/:orderID", controllers.GetDelivery())
 
 	//report
-	incomingRoutes.GET("/admin/report", controllers.GetReport())
+	incomingRoutes.POST("/admin/report", controllers.GetReport())
 
 	//flashSale
 	incomingRoutes.GET("/admin/flash-sale/list", controllers.GetFlashSales())
