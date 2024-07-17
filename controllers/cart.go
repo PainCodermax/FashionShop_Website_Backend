@@ -40,6 +40,9 @@ func AddToCart() gin.HandlerFunc {
 			var cartSearchItem models.CartItem
 			errItem := CartItemCollection.FindOne(ctx, bson.M{"product_id": cartItem.ProductID, "cart_id": cart.CartID}).Decode(&cartSearchItem)
 			if errItem != nil {
+				if salePrice := cache.GetSalePriceByProductId(cartItem.ProductID); salePrice != 0 {
+					cartItem.Price = salePrice
+				}
 				cartItem.CartID = cart.CartID
 				cartItem.CartItemID = utils.GenerateCode("CARTITEM", 9)
 				cartItem.Price = cartItem.Price * cartItem.ItemQuantity
@@ -53,20 +56,14 @@ func AddToCart() gin.HandlerFunc {
 				})
 			} else {
 				if salePrice := cache.GetSalePriceByProductId(cartItem.ProductID); salePrice != 0 {
-					cartItem.FlashSalePrice = salePrice
+					cartItem.Price = salePrice
 				}
-				if cartItem.FlashSalePrice != 0 {
-					cartItem.Price = cartSearchItem.FlashSalePrice + cartItem.Price*cartItem.FlashSalePrice
-				} else {
-					cartItem.Price = cartSearchItem.Price + cartItem.Price*cartItem.ItemQuantity
-				}
-
+				cartItem.Price = cartSearchItem.Price + cartItem.Price*cartItem.ItemQuantity
 				cartItem.ItemQuantity = cartSearchItem.ItemQuantity + cartItem.ItemQuantity
 				filter := bson.D{{"cart_item_id", cartSearchItem.CartItemID}}
 				update := bson.M{
 					"$set": cartItem,
 				}
-
 				_, err := CartItemCollection.UpdateOne(ctx, filter, update)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "not created"})

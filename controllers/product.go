@@ -47,6 +47,12 @@ func GetListProduct() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Can Not Get List"})
 			return
 		}
+		userID, ok := c.Get("uid")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+			return
+		}
+		userString := utils.InterfaceToString(userID)
 		totalCount, _ := ProductCollection.CountDocuments(ctx, bson.M{})
 		for result.Next(ctx) {
 			singleProduct := models.Product{}
@@ -60,6 +66,9 @@ func GetListProduct() gin.HandlerFunc {
 			}
 			if salePrice := cache.GetSalePriceByProductId(singleProduct.Product_ID); salePrice != 0 {
 				singleProduct.FlashSalePrice = salePrice
+			}
+			if ok := cache.GetWishListCache(singleProduct.Product_ID, userString); ok {
+				singleProduct.IsWish = true
 			}
 
 			filter := bson.D{{"category_id", singleProduct.CategoryID}}
@@ -203,15 +212,24 @@ func GetProduct() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		userID, ok := c.Get("uid")
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Cannot get userID"})
+			return
+		}
 		filter := bson.D{{"product_id", productId}}
 		err := ProductCollection.FindOne(ctx, filter).Decode(&foundProduct)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		
+
 		if salePrice := cache.GetSalePriceByProductId(productId); salePrice != 0 {
 			foundProduct.FlashSalePrice = salePrice
+		}
+		userString := utils.InterfaceToString(userID)
+		if ok := cache.GetWishListCache(productId, userString); ok {
+			foundProduct.IsWish = true
 		}
 		cateFilter := bson.D{{"category_id", foundProduct.CategoryID}}
 		category := make([]models.Category, 1)

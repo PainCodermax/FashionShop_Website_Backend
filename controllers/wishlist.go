@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/cache"
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
@@ -65,6 +66,7 @@ func LikeItem() gin.HandlerFunc {
 		}
 		wishItem.ID = primitive.NewObjectID()
 		wishItem.Created_At = time.Now()
+		cache.InitWishListCache(wishItem.ProductId, wishItem.UserId)
 		_, anyerr := WishItemCollection.InsertOne(ctx, wishItem)
 		if anyerr != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Not Created"})
