@@ -21,6 +21,9 @@ func GetReport() gin.HandlerFunc {
 			if value == true {
 				var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 				defer cancel()
+
+				
+
 				totalUser, _ := UserCollection.CountDocuments(ctx, bson.M{})
 				totalOrder, _ := OrderCollection.CountDocuments(ctx, bson.M{})
 				totalProduct, _ := ProductCollection.CountDocuments(ctx, bson.M{})

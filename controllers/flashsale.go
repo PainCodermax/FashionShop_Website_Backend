@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/cache"
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
@@ -239,8 +240,12 @@ func GetLatestFlashSale() gin.HandlerFunc {
 		opt := options.FindOneOptions{
 			Sort: bson.D{{Key: "created_at", Value: -1}},
 		}
-
-		result := FlashSaleCollection.FindOne(ctx, bson.D{{}}, &opt)
+		now := time.Now()
+		f := bson.D{
+			{"time_expired", bson.D{{"$gt", now}}},
+			{"time_started", bson.D{{"$lt", now}}},
+		}
+		result := FlashSaleCollection.FindOne(ctx, f, &opt)
 		singleFlashSale := models.FlashSale{}
 		if err := result.Decode(&singleFlashSale); err != nil {
 			c.JSON(http.StatusInternalServerError, models.ProductResponse{
@@ -280,8 +285,24 @@ func GetLatestFlashSale() gin.HandlerFunc {
 		for i := range productList {
 			productList[i].FlashSalePrice = *productList[i].Price - (*productList[i].Price/100)*flashSale.Discount
 		}
-		flashSale.ProductList = productList
 
+		if flashSale.TimeStarted.Before(time.Now()) && flashSale.TimeExpired.After(time.Now()) {
+			for i := range productList {
+				newPrice := *productList[i].Price - (*productList[i].Price/100)*flashSale.Discount
+				productList[i].FlashSalePrice = newPrice
+				min := int(flashSale.TimeExpired.Sub(time.Now()).Minutes())
+				durationInMinutes := time.Duration(min) * time.Minute
+				cache.InitFlashSaleCahe(durationInMinutes, productList[i].Product_ID, newPrice)
+			}
+		} else {
+			c.JSON(http.StatusOK, models.FlashSalehResponse{
+				Status:  200,
+				Message: "get flashsale successfully",
+				Data:    []models.FlashSale{},
+			})
+			return
+		}
+		flashSale.ProductList = productList
 		defer cancel()
 		c.JSON(http.StatusOK, models.FlashSalehResponse{
 			Status:  200,

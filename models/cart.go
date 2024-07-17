@@ -29,7 +29,8 @@ type CartItem struct {
 
 	ProductName *string  `json:"productName,omitempty" bson:"product_name,omitempty"`
 	Price       int      `json:"price,omitempty" bson:"price,omitempty"`
+	SalePrice   int      `json:"salePrice,omitempty" bson:"-"`
 	ListImage   []string `json:"listImage,omitempty" bson:"list_image,omitempty"`
 	Quantity    int      `json:"quantity,omitempty" bson:"quantity,omitempty"`
-	IsRate      bool     `json:"IsRate,omitempty" bson:"_"`
+	IsRate      bool     `json:"IsRate,omitempty" bson:"-"`
 }

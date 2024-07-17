@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/cache"
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
@@ -57,6 +58,10 @@ func GetListProduct() gin.HandlerFunc {
 				})
 				return
 			}
+			if salePrice := cache.GetSalePriceByProductId(singleProduct.Product_ID); salePrice != 0 {
+				singleProduct.SalePrice = &salePrice
+			}
+
 			filter := bson.D{{"category_id", singleProduct.CategoryID}}
 			category := make([]models.Category, 1)
 			err := CategoryCollection.FindOne(ctx, filter).Decode(&category[0])
@@ -204,6 +209,9 @@ func GetProduct() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		if salePrice := cache.GetSalePriceByProductId(productId); salePrice != 0 {
+			foundProduct.SalePrice = &salePrice
+		}
 		cateFilter := bson.D{{"category_id", foundProduct.CategoryID}}
 		category := make([]models.Category, 1)
 		cateErr := CategoryCollection.FindOne(ctx, cateFilter).Decode(&category[0])
@@ -260,6 +268,9 @@ func SearchProduct() gin.HandlerFunc {
 				})
 				return
 			}
+			if salePrice := cache.GetSalePriceByProductId(singleProduct.Product_ID); salePrice != 0 {
+				singleProduct.SalePrice = &salePrice
+			}
 			filter := bson.D{{"category_id", singleProduct.CategoryID}}
 			category := make([]models.Category, 1)
 			err := CategoryCollection.FindOne(ctx, filter).Decode(&category[0])
@@ -314,6 +325,9 @@ func GetProductByCategory() gin.HandlerFunc {
 					Data:    []models.Product{},
 				})
 				return
+			}
+			if salePrice := cache.GetSalePriceByProductId(singleProduct.Product_ID); salePrice != 0 {
+				singleProduct.SalePrice = &salePrice
 			}
 			filter := bson.D{{"category_id", singleProduct.CategoryID}}
 			category := make([]models.Category, 1)
@@ -404,6 +418,9 @@ func GetRecommendList() gin.HandlerFunc {
 			if err := products.Decode(&singleProduct); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error decoding data"})
 				return
+			}
+			if salePrice := cache.GetSalePriceByProductId(singleProduct.Product_ID); salePrice != 0 {
+				singleProduct.SalePrice = &salePrice
 			}
 			listProduct = append(listProduct, singleProduct)
 		}
