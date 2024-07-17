@@ -27,10 +27,10 @@ type CartItem struct {
 	ProductID    string `json:"productID,omitempty" bson:"product_id,omitempty"`
 	ItemQuantity int    `json:"itemQuantity,omitempty" bson:"item_quantity,omitempty"`
 
-	ProductName *string  `json:"productName,omitempty" bson:"product_name,omitempty"`
-	Price       int      `json:"price,omitempty" bson:"price,omitempty"`
-	SalePrice   int      `json:"salePrice,omitempty" bson:"-"`
-	ListImage   []string `json:"listImage,omitempty" bson:"list_image,omitempty"`
-	Quantity    int      `json:"quantity,omitempty" bson:"quantity,omitempty"`
-	IsRate      bool     `json:"IsRate,omitempty" bson:"-"`
+	ProductName    *string  `json:"productName,omitempty" bson:"product_name,omitempty"`
+	Price          int      `json:"price,omitempty" bson:"price,omitempty"`
+	FlashSalePrice int      `json:"flashSalePrice,omitempty" bson:"-"`
+	ListImage      []string `json:"listImage,omitempty" bson:"list_image,omitempty"`
+	Quantity       int      `json:"quantity,omitempty" bson:"quantity,omitempty"`
+	IsRate         bool     `json:"IsRate,omitempty" bson:"-"`
 }

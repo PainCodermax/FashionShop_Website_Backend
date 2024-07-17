@@ -59,7 +59,7 @@ func GetListProduct() gin.HandlerFunc {
 				return
 			}
 			if salePrice := cache.GetSalePriceByProductId(singleProduct.Product_ID); salePrice != 0 {
-				singleProduct.SalePrice = &salePrice
+				singleProduct.FlashSalePrice = salePrice
 			}
 
 			filter := bson.D{{"category_id", singleProduct.CategoryID}}
@@ -209,8 +209,9 @@ func GetProduct() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		
 		if salePrice := cache.GetSalePriceByProductId(productId); salePrice != 0 {
-			foundProduct.SalePrice = &salePrice
+			foundProduct.FlashSalePrice = salePrice
 		}
 		cateFilter := bson.D{{"category_id", foundProduct.CategoryID}}
 		category := make([]models.Category, 1)
@@ -269,7 +270,7 @@ func SearchProduct() gin.HandlerFunc {
 				return
 			}
 			if salePrice := cache.GetSalePriceByProductId(singleProduct.Product_ID); salePrice != 0 {
-				singleProduct.SalePrice = &salePrice
+				singleProduct.FlashSalePrice = salePrice
 			}
 			filter := bson.D{{"category_id", singleProduct.CategoryID}}
 			category := make([]models.Category, 1)
@@ -327,7 +328,7 @@ func GetProductByCategory() gin.HandlerFunc {
 				return
 			}
 			if salePrice := cache.GetSalePriceByProductId(singleProduct.Product_ID); salePrice != 0 {
-				singleProduct.SalePrice = &salePrice
+				singleProduct.FlashSalePrice = salePrice
 			}
 			filter := bson.D{{"category_id", singleProduct.CategoryID}}
 			category := make([]models.Category, 1)
@@ -420,7 +421,7 @@ func GetRecommendList() gin.HandlerFunc {
 				return
 			}
 			if salePrice := cache.GetSalePriceByProductId(singleProduct.Product_ID); salePrice != 0 {
-				singleProduct.SalePrice = &salePrice
+				singleProduct.FlashSalePrice = salePrice
 			}
 			listProduct = append(listProduct, singleProduct)
 		}

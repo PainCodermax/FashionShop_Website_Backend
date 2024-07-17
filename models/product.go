@@ -18,7 +18,6 @@ type Product struct {
 	Gender         string             `json:"gender,omitempty" bson:"gender,omitempty"`
 	CategoryMame   string             `json:"categoryName,omitempty" bson:"categorymame,omitempty"`
 	FlashSalePrice int                `json:"flashSalePrice,omitempty" bson:"-"`
-	SalePrice      *int               `json:"salePrice,omitempty" bson:"-"`
 
 	Created_At time.Time `json:"created_at"`
 	Updated_At time.Time `json:"updtaed_at"`

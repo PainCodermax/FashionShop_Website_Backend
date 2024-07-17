@@ -9,9 +9,14 @@ import (
 var FlashSaleCache *cache.Cache
 
 func InitFlashSaleCahe(t time.Duration, productId string, price int) {
-	c := cache.New(cache.NoExpiration, 720*time.Minute)
-	c.Set(productId, price, t)
-	FlashSaleCache = c
+	if FlashSaleCache == nil {
+		c := cache.New(cache.NoExpiration, 720*time.Minute)
+		c.Set(productId, price, t)
+		FlashSaleCache = c
+	} else {
+		FlashSaleCache.Set(productId, price, t)
+	}
+
 }
 
 func GetSalePriceByProductId(key string) int {

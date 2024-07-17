@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PainCodermax/FashionShop_Website_Backend/cache"
 	"github.com/PainCodermax/FashionShop_Website_Backend/database"
 	"github.com/PainCodermax/FashionShop_Website_Backend/models"
 	"github.com/PainCodermax/FashionShop_Website_Backend/utils"
@@ -51,7 +52,15 @@ func AddToCart() gin.HandlerFunc {
 					"message": "Successfully add to card!!",
 				})
 			} else {
-				cartItem.Price = cartSearchItem.Price + cartItem.Price*cartItem.ItemQuantity
+				if salePrice := cache.GetSalePriceByProductId(cartItem.ProductID); salePrice != 0 {
+					cartItem.FlashSalePrice = salePrice
+				}
+				if cartItem.FlashSalePrice != 0 {
+					cartItem.Price = cartSearchItem.FlashSalePrice + cartItem.Price*cartItem.FlashSalePrice
+				} else {
+					cartItem.Price = cartSearchItem.Price + cartItem.Price*cartItem.ItemQuantity
+				}
+
 				cartItem.ItemQuantity = cartSearchItem.ItemQuantity + cartItem.ItemQuantity
 				filter := bson.D{{"cart_item_id", cartSearchItem.CartItemID}}
 				update := bson.M{
