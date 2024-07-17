@@ -146,6 +146,7 @@ func GetWishList() gin.HandlerFunc {
 				})
 				return
 			}
+			wishItem.Product.IsWish = true
 			listProduct = append(listProduct, wishItem.Product)
 		}
 		c.JSON(http.StatusOK, models.ProductResponse{
