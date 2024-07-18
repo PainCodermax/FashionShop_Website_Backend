@@ -12,4 +12,5 @@ type Report struct {
 	TotalProduct      int64    `json:"totalProduct,omitempty"`
 	TotalRating       int64    `json:"totalRating,omitempty"`
 	Amounts           []Amount `json:"amounts,omitempty"`
+	TotalAmount       int      `json:"totalAmount,omitempty"`
 }

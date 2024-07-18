@@ -47,13 +47,30 @@ func GetReport() gin.HandlerFunc {
 						"$gte": fil.From,
 						"$lte": fil.To,
 					}
+
 				}
 
+				var totalAmount int = 0
 				totalUser, _ := UserCollection.CountDocuments(ctx, filterCondition)
 				totalOrder, _ := OrderCollection.CountDocuments(ctx, filterCondition)
 				totalProduct, _ := ProductCollection.CountDocuments(ctx, filterCondition)
 				totalOrderSuccess, _ := OrderCollection.CountDocuments(ctx, filterOrderSuccess)
 				totalRating, _ := RatingCollection.CountDocuments(ctx, filterCondition)
+
+				rs, err := OrderCollection.Find(ctx, filterOrderSuccess, nil)
+				if err != nil {
+					log.Println("Error finding orders:", err)
+					return
+				}
+
+				for rs.Next(ctx) {
+					order := models.Order{}
+					if err := rs.Decode(&order); err != nil {
+						log.Println("Error decoding order:", err)
+						continue
+					}
+					totalAmount = totalAmount + order.Price
+				}
 
 				limit := int64(20)
 				offset := int64(0)
@@ -132,6 +149,7 @@ func GetReport() gin.HandlerFunc {
 				rp.TotalProduct = totalProduct
 				rp.TotalUser = totalUser
 				rp.TotalRating = totalRating
+				rp.TotalAmount = totalAmount
 
 				var amountList []models.Amount
 				monthsSlice := []string{
